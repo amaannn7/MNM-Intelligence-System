@@ -177,7 +177,7 @@ function kvSet(string $bucket, string $key, $value): void {
 }
 
 function dbLoadMessages(string $threadId): array {
-    $stmt = db()->prepare("SELECT data FROM chat_messages WHERE thread_id=:t ORDER BY updated_at ASC");
+    $stmt = db()->prepare("SELECT data FROM chat_messages WHERE thread_id=:t ORDER BY (data->>'sent_at') ASC");
     $stmt->execute([':t' => $threadId]);
     return array_map(fn($r) => json_decode($r['data'], true), $stmt->fetchAll());
 }
