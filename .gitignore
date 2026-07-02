@@ -1,0 +1,10 @@
+local-data/
+local-data-backup/
+*.bak
+dump*.sql
+dump*.csv
+import_*.php
+reset_*.php
+qa_debug.php
+migrate.php
+db.local.php
