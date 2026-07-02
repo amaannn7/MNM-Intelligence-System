@@ -5142,7 +5142,7 @@ async function openChatThread(threadId, name, isDm, desc) {
     // Load messages then start poll
     await fetchChatMessages(true);
     loadPinnedBar();
-    chatState.pollTimer = setInterval(() => fetchChatMessages(false), 2000);
+    chatState.pollTimer = setInterval(() => fetchChatMessages(false), 3000);
 }
 
 function chatShowSidebar() {
@@ -5555,7 +5555,7 @@ function handleMentionTyping(input) {
     const before = val.substring(0, pos);
     const mentionMatch = before.match(/@([a-zA-Z0-9_\- ]*)$/);
     const picker = document.getElementById('mention-picker');
-    if (!mentionMatch) { if (picker) picker.innerHTML = ''; return; }
+    if (!mentionMatch || chatState.isDm) { if (picker) picker.innerHTML = ''; return; }
     const query = mentionMatch[1].toLowerCase();
     const names = chatDmData.map(t => t.user_name);
     const filtered = names.filter(n => n.toLowerCase().includes(query));
