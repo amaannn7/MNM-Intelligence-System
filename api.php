@@ -39,8 +39,8 @@ define('TARGETS_FILE',   DATA_DIR . 'targets.json');
 // Ensure uploads directory exists (files are still stored on disk)
 if (!is_dir(DATA_DIR . 'uploads')) @mkdir(DATA_DIR . 'uploads', 0755, true);
 
-const ACTIVE_STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','negotiating','nurture'];
-const SALES_STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','negotiating','won','lost','nurture'];
+const ACTIVE_STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','nurture'];
+const SALES_STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','won','lost','nurture'];
 const ALLOWED_ROLES = ['super_admin','admin','sales_rep'];
 const TARGET_METRICS = ['meetings_weekly','won_value_monthly','proposals_monthly','overdue_hygiene'];
 
@@ -98,6 +98,7 @@ function normalizeRole(string $role): string {
 }
 
 function normalizeStatus(string $status): string {
+    if ($status === 'negotiating') return 'nurture'; // stage removed — folded into Nurture
     return in_array($status, SALES_STATUSES, true) ? $status : 'new';
 }
 
@@ -139,7 +140,6 @@ function defaultNextAction(array $lead): array {
         'contacted' => ['call', 'Call and confirm logistics fit'],
         'meeting_booked' => ['meeting', 'Prepare for scheduled meeting'],
         'proposal_sent' => ['follow_up', 'Follow up on proposal'],
-        'negotiating' => ['call', 'Resolve pricing or service questions'],
         'nurture' => ['follow_up', 'Check whether timing has changed'],
     ];
     [$type, $note] = $map[$status] ?? ['follow_up', 'Set next step'];
@@ -164,6 +164,7 @@ function normalizeLead(array $lead): array {
     $lead['call_logs'] = $lead['call_logs'] ?? [];
     $lead['email_history'] = $lead['email_history'] ?? [];
     $lead['requisites'] = $lead['requisites'] ?? [];
+    $lead['stage_notes'] = is_array($lead['stage_notes'] ?? null) ? $lead['stage_notes'] : [];
     $lead['archived_at'] = $lead['archived_at'] ?? '';
     $lead['archived_by'] = $lead['archived_by'] ?? '';
     $lead['archive_reason'] = $lead['archive_reason'] ?? '';
@@ -387,7 +388,7 @@ function targetsForUsers(array $userIds): array {
     return $out;
 }
 
-function targetProgressForUser(string $userId, array $leads, array $meetings, array $targets): array {
+function targetProgressForUser(string $userId, array $leads, array $meetings, array $targets, bool $teamWideWonValue = false): array {
     $today = date('Y-m-d');
     $wStart = weekStart();
     $wEnd = weekEnd();
@@ -395,9 +396,13 @@ function targetProgressForUser(string $userId, array $leads, array $meetings, ar
     $mEnd = monthEnd();
     $ownedLeads = array_values(array_filter($leads, fn($l) => ($l['owner_id'] ?? '') === $userId));
     $ownedMeetings = array_values(array_filter($meetings, fn($m) => ($m['user_id'] ?? '') === $userId && ($m['status'] ?? '') !== 'cancelled'));
+    $wonValueOf = fn($ls) => array_reduce($ls, fn($sum, $l) => $sum + (($l['status'] ?? '') === 'won' && substr(($l['updated_at'] ?? $today), 0, 10) >= $mStart && substr(($l['updated_at'] ?? $today), 0, 10) <= $mEnd ? moneyValue($l['proposal_value'] ?: ($l['won_details']['value'] ?? 0)) : 0), 0);
     $actuals = [
         'meetings_weekly' => count(array_filter($ownedMeetings, fn($m) => !empty($m['start_time']) && substr($m['start_time'], 0, 10) >= $wStart && substr($m['start_time'], 0, 10) <= $wEnd)),
-        'won_value_monthly' => array_reduce($ownedLeads, fn($sum, $l) => $sum + (($l['status'] ?? '') === 'won' && substr(($l['updated_at'] ?? $today), 0, 10) >= $mStart && substr(($l['updated_at'] ?? $today), 0, 10) <= $mEnd ? moneyValue($l['won_details']['value'] ?? $l['proposal_value'] ?? 0) : 0), 0),
+        // Admin/super_admin see the company-wide won total on this card
+        // instead of just their own deals, since "Monthly won value" reads
+        // as a team number to them, not a personal quota.
+        'won_value_monthly' => $wonValueOf($teamWideWonValue ? $leads : $ownedLeads),
         'proposals_monthly' => count(array_filter($ownedLeads, fn($l) => ($l['status'] ?? '') === 'proposal_sent' && substr(($l['proposal_sent_at'] ?: ($l['updated_at'] ?? $today)), 0, 10) >= $mStart && substr(($l['proposal_sent_at'] ?: ($l['updated_at'] ?? $today)), 0, 10) <= $mEnd)),
         'overdue_hygiene' => count(array_filter($ownedLeads, fn($l) => isActiveLead($l) && !empty($l['next_action_due']) && $l['next_action_due'] <= $today)),
     ];
@@ -409,9 +414,15 @@ function targetProgressForUser(string $userId, array $leads, array $meetings, ar
         $targetValue = intval($target['target_value'] ?? defaultTargetValue($metric));
         $actual = $actuals[$metric] ?? 0;
         $isLimit = $metric === 'overdue_hygiene';
+        // Team-wide won value is allowed to visibly exceed 100% (e.g. $100k
+        // actual vs $50k target reads as 200%) so over-achievement is
+        // visible instead of capping at a full bar that looks the same as
+        // exactly hitting target.
+        $allowOverflow = $teamWideWonValue && $metric === 'won_value_monthly';
         $pct = $isLimit
             ? ($actual <= $targetValue ? 100 : max(0, 100 - (($actual - $targetValue) * 25)))
-            : ($targetValue > 0 ? min(100, round(($actual / $targetValue) * 100)) : 100);
+            : ($targetValue > 0 ? round(($actual / $targetValue) * 100) : 100);
+        if (!$isLimit && !$allowOverflow) $pct = min(100, $pct);
         $byMetric[$metric] = [
             'metric' => $metric,
             'label' => targetMetricLabel($metric),
@@ -465,7 +476,7 @@ function hasPermission(string $role, string $action): bool {
         'reassign_lead'         => ['admin', 'super_admin'],
         'manage_users'          => ['admin', 'super_admin'],
         'delete_user'           => ['super_admin'],
-        'view_audit_log'        => ['admin', 'super_admin'],
+        'view_audit_log'        => ['super_admin'],
         'manage_admin_settings' => ['admin', 'super_admin'],
         'manage_global_settings'=> ['super_admin'],
         'export_leads'          => ['admin', 'super_admin'],
@@ -1552,6 +1563,25 @@ switch ($action) {
         if (!empty($_GET['owner_id']) && hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
             $leads = array_values(array_filter($leads, fn($l) => $l['owner_id'] === $_GET['owner_id']));
         }
+        // "My Leads" vs "Team Leads" split for admin/super_admin — lets them
+        // separate their own owned leads from the reps' leads below them,
+        // since view_all_leads otherwise returns everyone's leads mixed together.
+        if (hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads') && !empty($_GET['scope'])) {
+            if ($_GET['scope'] === 'mine') {
+                $leads = array_values(array_filter($leads, fn($l) => $l['owner_id'] === $user['id']));
+            } elseif ($_GET['scope'] === 'team') {
+                $leads = array_values(array_filter($leads, fn($l) => $l['owner_id'] !== $user['id']));
+            }
+        }
+        // Per-status counts within the current scope (ownership/mine/team)
+        // but BEFORE the status filter below narrows the set — the filter
+        // tab row needs these to stay in sync with what each tab will show
+        // when clicked, which the scope-unaware dashboard stats can't do.
+        $scopedByStatus = [];
+        foreach ($leads as $l) {
+            $s = $l['status'] ?? 'new';
+            $scopedByStatus[$s] = ($scopedByStatus[$s] ?? 0) + 1;
+        }
         // Filter by status
         if (!empty($_GET['status'])) {
             $status = $_GET['status'];
@@ -1574,7 +1604,7 @@ switch ($action) {
         $page   = max(1, intval($_GET['page'] ?? 1));
         $limit  = min(200, intval($_GET['limit'] ?? 50));
         $leads  = array_slice($leads, ($page - 1) * $limit, $limit);
-        respond(['success' => true, 'leads' => $leads, 'total' => $total, 'page' => $page, 'limit' => $limit, 'pages' => (int)ceil($total / max(1, $limit))]);
+        respond(['success' => true, 'leads' => $leads, 'total' => $total, 'page' => $page, 'limit' => $limit, 'pages' => (int)ceil($total / max(1, $limit)), 'by_status' => $scopedByStatus]);
         break;
 
     case 'lead':
@@ -1725,13 +1755,15 @@ switch ($action) {
                             $l['archive_reason'] = $input['archive_reason'] ?? 'Archived from Sales Intelligence';
                             logActivity($user, 'lead.archived', ['lead_id' => $id]);
                         } else {
+                            if (!hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads'))
+                                respond(['success' => false, 'error' => 'Only admins can restore leads'], 403);
                             $l['archived_at'] = '';
                             $l['archived_by'] = '';
                             $l['archive_reason'] = '';
                             logActivity($user, 'lead.restored', ['lead_id' => $id]);
                         }
                     }
-                    $allowed = ['first_name','last_name','email','phone','company','title','industry','country','website','linkedin','notes','status','followup_date','lost_reason','sop_progress','call_logs','requisites','freight_profile','deal_score','ai_recommendation','won_details','owner_id','owner_name','next_action_type','next_action_due','next_action_note','stage_entered_at','proposal_value','proposal_sent_at','nurture_until','source'];
+                    $allowed = ['first_name','last_name','email','phone','company','title','industry','country','website','linkedin','notes','stage_notes','status','followup_date','lost_reason','sop_progress','call_logs','requisites','freight_profile','deal_score','ai_recommendation','won_details','owner_id','owner_name','next_action_type','next_action_due','next_action_note','stage_entered_at','proposal_value','proposal_sent_at','nurture_until','source'];
                     $changed = [];
                     foreach ($allowed as $f) {
                         if (isset($input[$f])) { $l[$f] = $input[$f]; $changed[] = $f; }
@@ -1749,6 +1781,16 @@ switch ($action) {
                     }
                     if ($l['status'] === 'lost' && empty($l['lost_reason'])) {
                         respond(['success' => false, 'error' => 'Lost leads require a reason'], 400);
+                    }
+                    // A deal that's won or lost has no pending next action —
+                    // whatever was queued (a follow-up, a call) is now moot,
+                    // but every view (detail page, Workbench, Prospects list,
+                    // Focus Queue) kept showing it as if the deal were still
+                    // open until this was cleared.
+                    if (in_array($l['status'], ['won', 'lost'], true) && $l['status'] !== $oldStatus) {
+                        $l['next_action_type'] = '';
+                        $l['next_action_note'] = '';
+                        $l['next_action_due'] = '';
                     }
                     if (isActiveLead($l) && empty($l['next_action_type'])) {
                         $next = defaultNextAction($l);
@@ -2314,8 +2356,8 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
             respond(['success' => true]);
         }
         if ($method === 'DELETE') {
-            if ($user['role'] !== 'super_admin')
-                respond(['success' => false, 'error' => 'Only super admin can delete SOPs'], 403);
+            if (!in_array($user['role'] ?? '', ['admin', 'super_admin'], true))
+                respond(['success' => false, 'error' => 'Only admins can delete SOPs'], 403);
             $id = $input['id'] ?? '';
             $records = array_values(array_filter(dbLoadAll('sop_records'), fn($r) => $r['id'] !== $id));
             dbSaveAll('sop_records', $records);
@@ -2440,7 +2482,14 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $activeLeads = array_filter($leads, fn($l) => !in_array($l['status'], ['won', 'lost']));
         $scores = array_filter(array_column($activeLeads, 'deal_score'), fn($s) => $s > 0);
         $avgScore = count($scores) > 0 ? round(array_sum($scores) / count($scores)) : 0;
-        $pipelineValue = ($byStatus['proposal_sent'] ?? 0) + ($byStatus['negotiating'] ?? 0);
+        $pipelineValue = ($byStatus['proposal_sent'] ?? 0);
+
+        // Dollar totals — proposal_value is the editable Deal Value field and
+        // is the source of truth; won_details.value is only a fallback for
+        // older Won records that predate proposal_value being kept in sync.
+        $dealAmount = fn($l) => moneyValue($l['proposal_value'] ?: ($l['won_details']['value'] ?? 0));
+        $wonDealValue = array_sum(array_map($dealAmount, array_filter($leads, fn($l) => ($l['status'] ?? '') === 'won')));
+        $pipelineDollarValue = array_sum(array_map($dealAmount, array_filter($leads, fn($l) => in_array($l['status'] ?? '', ['proposal_sent', 'meeting_booked'], true))));
 
         $visibleUserIds = hasPermission($user['role'] ?? 'sales_rep', 'view_team_stats')
             ? array_values(array_map(fn($u) => $u['id'], array_filter(getUsers(), fn($u) => ($u['is_active'] ?? true) && !isArchived($u))))
@@ -2464,6 +2513,8 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
             'meetings_today_list' => array_values($meetingsToday),
             'avg_deal_score' => $avgScore,
             'pipeline_value' => $pipelineValue,
+            'won_deal_value' => $wonDealValue,
+            'pipeline_dollar_value' => $pipelineDollarValue,
             'proposals_sent' => $byStatus['proposal_sent'] ?? 0,
             'target_progress' => targetProgressForUser($user['id'], $allLeads, $meetingsArr, $visibleTargets),
         ];
@@ -2762,6 +2813,12 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         }
         if (!hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
             $exportLeads = array_filter($exportLeads, fn($l) => $l['owner_id'] === $user['id']);
+        } elseif (!empty($_GET['scope'])) {
+            if ($_GET['scope'] === 'mine') {
+                $exportLeads = array_filter($exportLeads, fn($l) => $l['owner_id'] === $user['id']);
+            } elseif ($_GET['scope'] === 'team') {
+                $exportLeads = array_filter($exportLeads, fn($l) => $l['owner_id'] !== $user['id']);
+            }
         }
         if (!empty($_GET['status'])) {
             $exportLeads = array_filter($exportLeads, fn($l) => $l['status'] === $_GET['status']);
@@ -2772,14 +2829,14 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="leads_' . date('Y-m-d') . '.csv"');
         $out = fopen('php://output', 'w');
-        fputcsv($out, ['First Name','Last Name','Email','Phone','Company','Title','Industry','Country','Status','Owner','Emails Sent','Calls','Follow-up','Created','Deal Score']);
+        fputcsv($out, ['First Name','Last Name','Email','Phone','Company','Title','Industry','Country','Status','Owner','Emails Sent','Calls','Follow-up','Created','Deal Score','Deal Value']);
         foreach ($exportLeads as $l) {
             fputcsv($out, [
                 $l['first_name'] ?? '', $l['last_name'] ?? '', $l['email'] ?? '', $l['phone'] ?? '',
                 $l['company'] ?? '', $l['title'] ?? '', $l['industry'] ?? '', $l['country'] ?? '',
                 $l['status'] ?? '', $l['owner_name'] ?? '', $l['emails_sent'] ?? 0,
                 count($l['call_logs'] ?? []), $l['followup_date'] ?? '',
-                substr($l['created_at'] ?? '', 0, 10), $l['deal_score'] ?? 0
+                substr($l['created_at'] ?? '', 0, 10), $l['deal_score'] ?? 0, $l['proposal_value'] ?? ''
             ]);
         }
         fclose($out);
@@ -2801,6 +2858,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
             respond(['success' => true, 'channels' => $channels]);
         }
         if ($method === 'POST') {
+            if (!isChatAdmin($user)) respond(['success' => false, 'error' => 'Only admins can create channels'], 403);
             $name = strtolower(trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $input['name'] ?? '')));
             if (!$name) respond(['success' => false, 'error' => 'Channel name required'], 400);
             $channels = getChatChannels();
@@ -2814,7 +2872,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
             respond(['success' => true, 'channel' => $newChannel]);
         }
         if ($method === 'DELETE') {
-            if ($user['role'] !== 'super_admin') respond(['success' => false, 'error' => 'Only super admin can delete channels'], 403);
+            if (!in_array($user['role'] ?? '', ['admin', 'super_admin'], true)) respond(['success' => false, 'error' => 'Only admins can delete channels'], 403);
             $channelId = $input['id'] ?? '';
             if ($channelId === 'channel_general') respond(['success' => false, 'error' => 'Cannot delete the general channel'], 400);
             if (!$channelId) respond(['success' => false, 'error' => 'Channel ID required'], 400);
@@ -2891,7 +2949,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
                     if (getDmThreadId($user['id'], $u['id']) === $threadId) {
                         _applyNotif($allUsers, $u['id'], [
                             'id'         => 'notif_' . bin2hex(random_bytes(6)),
-                            'notif_key'  => 'dm_' . $threadId . '_' . substr(md5($text), 0, 8),
+                            'notif_key'  => 'dm_' . $msg['id'],
                             'type'       => 'chat_dm',
                             'title'      => "DM from {$senderName}",
                             'body'       => substr($text, 0, 100),
@@ -3036,6 +3094,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
     case 'chat-pin-message':
         if ($method !== 'POST') break;
         $user = requireAuth();
+        if (!isChatAdmin($user)) respond(['success' => false, 'error' => 'Only admins can pin messages'], 403);
         $threadId = preg_replace('/[^a-zA-Z0-9_]/', '', $input['thread'] ?? '');
         $msgId    = $input['message_id'] ?? '';
         $unpin    = !empty($input['unpin']);
@@ -3262,9 +3321,18 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $forceBust = isset($_GET['bust']);
         if (!$forceBust) {
             $cached = kvGet('news_cache', $cacheKey, null);
-            $ttl = 300;
-            if ($cached && isset($cached['fetched_at']) && (time() - $cached['fetched_at']) < $ttl) {
-                respond(['success' => true, 'articles' => $cached['articles'], 'sources' => $cached['sources'], 'cached' => true, 'age' => time() - $cached['fetched_at']]);
+            $ttl  = 1800; // 30 minutes
+            $stale = 7200; // serve stale up to 2 hours while refreshing in background
+            if ($cached && isset($cached['fetched_at'])) {
+                $age = time() - $cached['fetched_at'];
+                if ($age < $ttl) {
+                    // Fresh — serve immediately
+                    respond(['success' => true, 'articles' => $cached['articles'], 'sources' => $cached['sources'], 'cached' => true, 'age' => $age]);
+                } elseif ($age < $stale) {
+                    // Stale but usable — serve now, mark for background refresh
+                    respond(['success' => true, 'articles' => $cached['articles'], 'sources' => $cached['sources'], 'cached' => true, 'stale' => true, 'age' => $age]);
+                }
+                // Older than 2 hours — fall through and re-fetch synchronously
             }
         }
         // Always clear cache when busting so keyword reset takes effect

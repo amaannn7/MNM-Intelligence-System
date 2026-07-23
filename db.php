@@ -3,11 +3,13 @@
  * db.php — PostgreSQL connection + schema bootstrap
  */
 
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_PORT', getenv('DB_PORT') ?: '5432');
-define('DB_NAME', getenv('DB_NAME') ?: 'stagdctc_mnmdb');
-define('DB_USER', getenv('DB_USER') ?: 'stagdctc_mnm');
-define('DB_PASS', getenv('DB_PASS') ?: 'LevataDev2026!');
+$_env_cfg = is_file(__DIR__ . '/.env.php') ? require __DIR__ . '/.env.php' : [];
+$_local_db = file_exists(__DIR__ . '/local-db') ? ($_env_cfg['local_db'] ?? []) : [];
+define('DB_HOST', getenv('DB_HOST') ?: ($_local_db['host'] ?? 'localhost'));
+define('DB_PORT', getenv('DB_PORT') ?: ($_local_db['port'] ?? '5432'));
+define('DB_NAME', getenv('DB_NAME') ?: ($_local_db['name'] ?? 'stagdctc_mnmdb'));
+define('DB_USER', getenv('DB_USER') ?: ($_local_db['user'] ?? 'stagdctc_mnm'));
+define('DB_PASS', getenv('DB_PASS') ?: ($_local_db['pass'] ?? 'LevataDev2026!'));
 
 function db(): PDO {
     static $pdo = null;

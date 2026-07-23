@@ -406,6 +406,7 @@ a:hover{text-decoration:underline;}
 .modal-bg.open{opacity:1;pointer-events:all;}
 .modal{background:var(--white);border-radius:var(--radius-lg);width:95%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .2s ease;}
 .modal-wide{max-width:640px;}
+.modal-xl{max-width:900px;}
 @keyframes modalIn{from{transform:translateY(12px);opacity:0;}to{transform:none;opacity:1;}}
 .modal-top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--g200);}
 .modal-top h3{font-size:15px;font-weight:600;}
@@ -580,10 +581,34 @@ a:hover{text-decoration:underline;}
 .tl-ai .tl-event{color:var(--green);}
 .tl-created .tl-event{color:var(--g500);}
 
-/* === SOP CHECKLIST === */
-.sop-step{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:13px;}
-.sop-step input[type="checkbox"]{margin-top:2px;accent-color:var(--mm-blue);}
-.sop-step.checked{color:var(--g400);text-decoration:line-through;}
+/* === SOP CHECKLIST (in-lead panel) === */
+.sop-step{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;font-size:13px;transition:background .12s;cursor:pointer;}
+.sop-step:hover{background:var(--g50);}
+.sop-step input[type="checkbox"]{width:16px;height:16px;margin:0;accent-color:var(--mm-blue);cursor:pointer;flex-shrink:0;}
+.sop-step.checked{color:var(--g400);}
+.sop-step.checked .sop-step-text{text-decoration:line-through;}
+.sop-step-num{width:20px;height:20px;border-radius:50%;background:var(--g100);color:var(--g500);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sop-step.checked .sop-step-num{background:var(--success-bg,#d1fae5);color:var(--success,#059669);}
+.sop-progress-bar{height:4px;background:var(--g100);border-radius:4px;overflow:hidden;margin:8px 0 12px;}
+.sop-progress-fill{height:100%;background:var(--mm-blue);border-radius:4px;transition:width .3s ease;}
+.sop-progress-label{font-size:11px;color:var(--g500);margin-bottom:6px;display:flex;justify-content:space-between;}
+
+/* === SOP KNOWLEDGE BASE CARDS === */
+.sop-kb-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg,10px);padding:0;overflow:hidden;cursor:pointer;transition:box-shadow .18s,transform .18s;display:flex;flex-direction:column;}
+.sop-kb-card:hover{box-shadow:0 6px 24px rgba(0,0,0,0.10);transform:translateY(-2px);}
+.sop-kb-card-top{padding:16px 16px 12px;}
+.sop-kb-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.sop-kb-name{font-size:15px;font-weight:700;color:var(--g900);line-height:1.3;}
+.sop-kb-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:var(--radius-pill);flex-shrink:0;}
+.sop-kb-badge.active{background:#d1fae5;color:#065f46;}
+.sop-kb-badge.inactive{background:var(--g100);color:var(--g500);}
+.sop-kb-meta{font-size:11px;color:var(--g400);display:flex;align-items:center;gap:6px;}
+.sop-kb-fields{border-top:1px solid var(--g100);padding:10px 16px;flex:1;}
+.sop-kb-field{display:flex;gap:6px;font-size:12px;padding:4px 0;}
+.sop-kb-field-label{color:var(--g400);min-width:100px;flex-shrink:0;}
+.sop-kb-field-val{color:var(--g800);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sop-kb-footer{border-top:1px solid var(--g100);padding:9px 16px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--g400);background:var(--g50);}
+.sop-chip{display:inline-block;padding:2px 7px;background:var(--mm-blue-10);color:var(--mm-blue);border-radius:var(--radius-pill);font-size:10px;font-weight:600;margin:1px 2px;}
 
 /* === MEETING CARD === */
 .mtg-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--radius);padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;transition:box-shadow .15s;}
@@ -669,6 +694,8 @@ a:hover{text-decoration:underline;}
 .sop-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
 .sop-card h4{font-size:13px;font-weight:600;margin-bottom:8px;}
 .sop-card .sop-trigger{font-size:10px;text-transform:uppercase;color:var(--g400);margin-bottom:8px;}
+.sop-stage-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mm-blue);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sop-stage-label::after{content:'';flex:1;height:1px;background:var(--g100);}
 
 /* === ANIMATIONS === */
 @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:none;opacity:1;}}
@@ -905,6 +932,9 @@ a:hover{text-decoration:underline;}
 @media(max-width:1100px){
     .prospect-table .col-updated,.prospect-table .col-owner { display:none; }
 }
+@media(max-width:1000px){
+    .prospect-table .col-deal-value { display:none; }
+}
 @media(max-width:900px){
     .prospect-table .col-next-action { display:none; }
     .prospect-actions-row { opacity:1; }
@@ -978,6 +1008,11 @@ a:hover{text-decoration:underline;}
 .chat-msg-time-hover { font-size:11px;color:var(--text-muted);white-space:nowrap;padding:0 4px; }
 .chat-mention { font-weight:600;border-radius:4px;padding:0 3px;background:rgba(36,83,159,0.15);color:var(--navy); }
 .chat-bubble.me .chat-mention { background:rgba(255,255,255,0.2);color:#fff; }
+.chat-client-ref { display:inline-flex;align-items:center;gap:3px;font-weight:600;border-radius:999px;padding:1px 8px 1px 6px;background:var(--green-bg);color:var(--green);border:1px solid var(--green);cursor:pointer;text-decoration:none; }
+.chat-client-ref::before { content:'👤';font-size:10px; }
+.chat-bubble.me .chat-client-ref { background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.6); }
+.chat-client-ref:hover { background:var(--green);color:#fff; }
+.chat-bubble.me .chat-client-ref:hover { background:rgba(255,255,255,0.3); }
 .chat-file-img { max-width:260px;max-height:260px;border-radius:10px;display:block;cursor:pointer;border:1px solid var(--border); }
 .chat-file-doc { display:flex;align-items:center;gap:10px;background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:10px 14px;text-decoration:none;color:var(--text-primary);max-width:260px; }
 .chat-file-doc:hover { background:var(--border-light); }
@@ -1083,6 +1118,7 @@ a:hover{text-decoration:underline;}
 .news-reader-proxied a { color:var(--mm-blue); }
 @keyframes spin { to { transform:rotate(360deg); } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -1172,6 +1208,11 @@ a:hover{text-decoration:underline;}
                         <button class="btn btn-primary" onclick="openModal('m-add-lead')">+ Add Prospect</button>
                         <button class="btn btn-secondary" onclick="openMeetingForm()">+ Book Meeting</button>
                         <button class="btn btn-secondary" onclick="showPage('leads')">Open List</button>
+                        <select class="btn btn-secondary hidden" id="workbench-scope" onchange="S.leadsScope=this.value;loadWorkbench(true)" style="cursor:pointer;font-family:inherit;white-space:nowrap;">
+                            <option value="">All Leads</option>
+                            <option value="mine">My Leads</option>
+                            <option value="team">Team Leads</option>
+                        </select>
                     </div>
                 </div>
                 <div class="prospect-insights" id="workbench-insights"></div>
@@ -1210,9 +1251,14 @@ a:hover{text-decoration:underline;}
                     <div class="prospect-search"><input type="text" id="leads-search" placeholder="Search prospects, companies, emails, statuses..." oninput="debounceSearch()"></div>
                     <div class="prospect-actions">
                         <button class="btn btn-primary" onclick="openModal('m-add-lead')">+ Add Prospect</button>
-                        <button class="btn btn-secondary" onclick="openModal('m-import')">Import CSV</button>
+                        <button class="btn btn-secondary" onclick="openImportCSV()">Import CSV</button>
                         <button class="btn btn-secondary" onclick="showPage('workbench')">Open Workbench</button>
                         <button class="btn btn-secondary hidden" id="btn-export" onclick="exportLeads()">Export CSV</button>
+                        <select class="btn btn-secondary hidden" id="leads-scope" onchange="S.leadsScope=this.value;loadLeads(true)" style="cursor:pointer;font-family:inherit;white-space:nowrap;">
+                            <option value="">All Leads</option>
+                            <option value="mine">My Leads</option>
+                            <option value="team">Team Leads</option>
+                        </select>
                         <label class="btn btn-secondary hidden" id="archived-toggle"><input type="checkbox" id="show-archived" onchange="S.showArchived=this.checked;loadLeads(true)" style="accent-color:var(--mm-blue);"> Archived</label>
                     </div>
                 </div>
@@ -1226,7 +1272,7 @@ a:hover{text-decoration:underline;}
                 </div>
                 <div class="prospect-table-wrap">
                 <table class="prospect-table data-table">
-                    <thead><tr><th>Prospect</th><th>Company</th><th>Stage</th><th class="col-next-action">Next Action</th><th class="col-updated">Updated</th><th class="col-owner">Owner</th><th style="min-width:180px;"></th></tr></thead>
+                    <thead><tr><th>Prospect</th><th>Company</th><th>Stage</th><th class="col-deal-value">Deal Value</th><th class="col-next-action">Next Action</th><th class="col-updated">Updated</th><th class="col-owner">Owner</th><th style="min-width:180px;"></th></tr></thead>
                     <tbody id="leads-tbody"></tbody>
                 </table>
                 </div>
@@ -1273,8 +1319,9 @@ a:hover{text-decoration:underline;}
                     <div class="contact-grid" id="det-contact"></div>
                 </div>
                 <div class="card prospect-notes-card">
-                    <div class="card-head"><h3>Prospect Notes</h3></div>
-                    <textarea id="det-notes" placeholder="Add useful notes for this prospect: context, objections, trade lanes, current forwarder, decision process..."></textarea>
+                    <div class="card-head"><h3>Stage Notes</h3></div>
+                    <select id="det-notes-stage" onchange="renderProspectNotes()" style="width:100%;margin-bottom:8px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;"></select>
+                    <textarea id="det-notes" placeholder="Add notes for this stage: context, objections, trade lanes, current forwarder, decision process..."></textarea>
                     <div class="notes-save-row"><small id="notes-save-status">Notes are private to this CRM record.</small><button class="btn btn-sm btn-primary" onclick="saveProspectNotes()">Save Notes</button></div>
                 </div>
                 <div class="card freight-card" id="det-freight-card">
@@ -1700,7 +1747,7 @@ a:hover{text-decoration:underline;}
         <div id="chat-sidebar" style="width:220px;flex-shrink:0;background:var(--bg-main);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;">
             <div style="padding:12px 16px 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center;">
                 Channels
-                <button class="btn btn-xs" onclick="openCreateChannel()" style="font-size:10px;padding:2px 8px;">+ New</button>
+                <button class="btn btn-xs" id="chat-new-channel-btn" onclick="openCreateChannel()" style="font-size:10px;padding:2px 8px;">+ New</button>
             </div>
             <div id="chat-channel-list"></div>
             <div style="padding:12px 16px 6px;margin-top:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);">Direct Messages</div>
@@ -1725,7 +1772,10 @@ a:hover{text-decoration:underline;}
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                     </button>
                     <button onclick="toggleComposeEmoji(event)" title="Emoji" style="background:var(--bg-main);color:var(--text-secondary);border:1px solid var(--border);border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;line-height:1;">😊</button>
-                    <textarea id="chat-input" placeholder="Message... use @ to mention someone" rows="1" style="flex:1;resize:none;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;line-height:1.5;max-height:120px;overflow-y:auto;" onkeydown="chatInputKeydown(event)" oninput="chatInputOnInput(event)"></textarea>
+                    <button onclick="openClientRefPicker()" title="Reference a client" style="background:var(--bg-main);color:var(--text-secondary);border:1px solid var(--border);border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7" y2="7"/></svg>
+                    </button>
+                    <textarea id="chat-input" placeholder="Message... use @ to mention someone, # to reference a client" rows="1" style="flex:1;resize:none;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;line-height:1.5;max-height:120px;overflow-y:auto;" onkeydown="chatInputKeydown(event)" oninput="chatInputOnInput(event)"></textarea>
                     <button onclick="sendChatMessage()" style="background:var(--navy);color:white;border:none;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
@@ -1760,7 +1810,8 @@ a:hover{text-decoration:underline;}
     <div class="form-row"><div class="form-group"><label>Industry</label><input type="text" id="ed-industry"></div><div class="form-group"><label>Country</label><input type="text" id="ed-country"></div></div>
     <div class="form-row"><div class="form-group"><label>Website</label><input type="url" id="ed-website"></div><div class="form-group"><label>LinkedIn</label><input type="url" id="ed-linkedin"></div></div>
     <div class="form-row"><div class="form-group"><label>Owner</label><select id="ed-owner"></select></div><div class="form-group"><label>Source</label><input type="text" id="ed-source"></div></div>
-    <div class="form-row"><div class="form-group"><label>Stage</label><select id="ed-status"></select></div><div class="form-group"><label>Next Action</label><select id="ed-next-type"></select></div></div>
+    <div class="form-row"><div class="form-group"><label>Stage</label><select id="ed-status"></select></div><div class="form-group"><label>Deal Value</label><input type="text" id="ed-proposal-value" placeholder="e.g. $50,000"></div></div>
+    <div class="form-row"><div class="form-group"><label>Next Action</label><select id="ed-next-type"></select></div><div class="form-group"></div></div>
     <div class="form-row"><div class="form-group"><label>Next Action Due</label><input type="date" id="ed-next-due"></div><div class="form-group"><label>Follow-up Date</label><input type="date" id="ed-followup"></div></div>
     <div class="form-group"><label>Next Action Note</label><input type="text" id="ed-next-note" placeholder="Clear next step for the rep"></div>
     <div class="form-group"><label>Notes</label><textarea id="ed-notes" rows="2"></textarea></div>
@@ -1798,10 +1849,57 @@ a:hover{text-decoration:underline;}
 </div><div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('m-meeting')">Cancel</button><button class="btn btn-primary" onclick="bookMeeting()" id="btn-book-meeting">Book Meeting</button></div></div></div>
 
 <!-- Import CSV Modal -->
-<div class="modal-bg" id="m-import"><div class="modal"><div class="modal-top"><h3>Import CSV</h3><button class="modal-x" onclick="closeModal('m-import')">&times;</button></div><div class="modal-body">
-    <p style="font-size:12px;color:var(--g500);margin-bottom:10px;">CSV columns: first_name, last_name, email, phone, company, title, industry, country, website, linkedin, notes</p>
-    <input type="file" id="csv-file" accept=".csv">
-</div><div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('m-import')">Cancel</button><button class="btn btn-primary" onclick="importCSV()" id="btn-import">Import</button></div></div></div>
+<div class="modal-bg" id="m-import"><div class="modal modal-xl"><div class="modal-top"><h3>Import CSV / Excel</h3><button class="modal-x" onclick="closeModal('m-import')">&times;</button></div><div class="modal-body" style="max-height:75vh;overflow-y:auto;padding:0;">
+    <!-- Step 1: File picker -->
+    <div style="padding:16px;">
+        <input type="file" id="csv-file" accept=".csv,.xlsx,.xls" onchange="handleImportFile(event)">
+        <p style="font-size:11px;color:var(--g400);margin-top:8px;">CSV or Excel (.xlsx, .xls) — any column names accepted, map them in the next step.</p>
+    </div>
+    <!-- Step 2: Column mapping -->
+    <div id="import-mapping" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--border);">
+            <div>
+                <strong style="font-size:14px;">Map Your Columns</strong>
+                <div id="mapping-lead-count" style="font-size:12px;color:var(--g500);margin-top:2px;"></div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="csvApplyMapping()">Preview &rarr;</button>
+        </div>
+        <!-- Legend -->
+        <div style="display:flex;gap:16px;align-items:center;padding:8px 16px;background:var(--g100);border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:12px;color:var(--g500);">
+            <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;"></span> Auto-matched</span>
+            <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--g300);display:inline-block;"></span> Not mapped (skipped)</span>
+        </div>
+        <!-- Column headers -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:2px solid var(--border);">
+            <div style="padding:10px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);">Your Column</div>
+            <div style="padding:10px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);border-left:1px solid var(--border);">Maps To</div>
+        </div>
+        <div id="mapping-rows"></div>
+    </div>
+    <!-- Step 3: Preview -->
+    <div id="import-preview" style="display:none;border-top:2px solid var(--border);margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;">
+            <div>
+                <div style="font-size:14px;font-weight:600;">Preview — <span id="preview-count">0</span> prospects</div>
+                <div style="font-size:12px;color:var(--g400);margin-top:2px;">Showing first 8 rows. All rows will be imported.</div>
+            </div>
+            <button class="btn btn-primary" id="btn-import" onclick="csvConfirmImport()">Import All</button>
+        </div>
+        <div style="overflow-x:auto;padding:0 16px 16px;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead><tr style="background:var(--g100);">
+                    <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap;">Name</th>
+                    <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap;">Email</th>
+                    <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap;">Company</th>
+                    <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);font-weight:600;white-space:nowrap;">Phone</th>
+                </tr></thead>
+                <tbody id="preview-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div><div class="modal-foot">
+    <button class="btn btn-secondary" onclick="closeModal('m-import')">Cancel</button>
+</div></div></div>
 
 <!-- Create / Edit Channel Modal -->
 <div class="modal-bg" id="create-channel-modal"><div class="modal"><div class="modal-top"><h3 id="channel-modal-title">Create Channel</h3><button class="modal-x" onclick="closeModal('create-channel-modal')">&times;</button></div><div class="modal-body">
@@ -1812,6 +1910,12 @@ a:hover{text-decoration:underline;}
         <div id="channel-members-list" style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;padding:8px;border:1px solid var(--g200);border-radius:8px;margin-top:4px;"></div>
     </div>
 </div><div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('create-channel-modal')">Cancel</button><button class="btn btn-primary" id="channel-modal-btn" onclick="submitChannelModal()">Create Channel</button></div></div></div>
+
+<!-- Reference Client Modal -->
+<div class="modal-bg" id="m-client-ref"><div class="modal"><div class="modal-top"><h3>Reference a Client</h3><button class="modal-x" onclick="closeModal('m-client-ref')">&times;</button></div><div class="modal-body">
+    <input type="text" id="client-ref-search" placeholder="Search clients by name or company..." oninput="renderClientRefList()" style="width:100%;margin-bottom:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;">
+    <div id="client-ref-list" style="display:flex;flex-direction:column;gap:2px;max-height:360px;overflow-y:auto;"></div>
+</div></div></div>
 
 <!-- Add User Modal -->
 <div class="modal-bg" id="m-add-user"><div class="modal"><div class="modal-top"><h3>Add User</h3><button class="modal-x" onclick="closeModal('m-add-user')">&times;</button></div><div class="modal-body">
@@ -1837,9 +1941,9 @@ a:hover{text-decoration:underline;}
 
 <!-- Confirmation Modal -->
 <div class="modal-bg" id="m-confirm"><div class="modal"><div class="modal-top"><h3 id="confirm-title">Confirm</h3><button class="modal-x" onclick="closeModal('m-confirm')">&times;</button></div><div class="modal-body">
-    <p id="confirm-body" style="font-size:13px;color:var(--g600);line-height:1.5;"></p>
+    <div id="confirm-body" style="font-size:13px;color:var(--g600);line-height:1.5;"></div>
     <div class="form-group hidden" id="confirm-reason-wrap"><label>Reason</label><input type="text" id="confirm-reason" placeholder="Optional archive reason"></div>
-</div><div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('m-confirm')">Cancel</button><button class="btn btn-danger" id="confirm-ok">Confirm</button></div></div></div>
+</div><div class="modal-foot"><button class="btn btn-secondary" id="confirm-cancel" onclick="closeModal('m-confirm')">Cancel</button><button class="btn btn-danger" id="confirm-ok">Confirm</button></div></div></div>
 
 <!-- Research Sources Modal -->
 <div class="modal-bg" id="m-research-sources"><div class="modal"><div class="modal-top"><h3>Research Sources</h3><button class="modal-x" onclick="closeModal('m-research-sources')">&times;</button></div><div class="modal-body"><div id="research-sources-list"></div></div><div class="modal-foot"><button class="btn btn-secondary" onclick="closeModal('m-research-sources')">Close</button></div></div></div>
@@ -1942,10 +2046,10 @@ a:hover{text-decoration:underline;}
 
 <script>
 // ── Global State & Constants ──
-const S = {user:null, leads:[], cur:null, meetings:[], templates:[], sops:[], filter:'', curTab:'profile', searchTO:null, outMtgId:null, leadsPage:1, leadsTotal:0, leadsPages:1, lastStats:null, teamMembers:[], msStatus:null, outlookEvents:[], showArchived:false, showArchivedUsers:false, users:[], targets:[], targetUsers:[], targetMetrics:[], calendarDate:new Date()};
+const S = {user:null, leads:[], cur:null, meetings:[], templates:[], sops:[], filter:'', curTab:'profile', searchTO:null, outMtgId:null, leadsPage:1, leadsTotal:0, leadsTotalAll:0, leadsPages:1, lastStats:null, teamMembers:[], msStatus:null, outlookEvents:[], showArchived:false, showArchivedUsers:false, users:[], targets:[], targetUsers:[], targetMetrics:[], calendarDate:new Date(), leadsScope:'', scopedByStatus:{}};
 const API = 'api.php';
-const STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','negotiating','won','lost','nurture'];
-const ACTIVE_STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','negotiating','nurture'];
+const STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','won','lost','nurture'];
+const ACTIVE_STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','nurture'];
 const SL = {new:'New', qualified:'Qualified', researched:'Researched', contacted:'Contacted', meeting_booked:'Meeting Booked', proposal_sent:'Proposal Sent', negotiating:'Negotiating', won:'Won', lost:'Lost', nurture:'Nurture'};
 const NEXT_LABELS = {research:'Research', email:'Email', call:'Call', meeting:'Meeting', follow_up:'Follow-up', proposal:'Proposal', quote:'Quote', nurture:'Nurture'};
 const EMAIL_TYPES = ['introduction','value_add','rate_offer','meeting_request','breakup'];
@@ -2003,9 +2107,12 @@ function canManageAll() { return ['admin','super_admin'].includes(S.user?.role);
 function canHardDelete() { return S.user?.role === 'super_admin'; }
 function canEditLead(l) { return canManageAll() || l?.owner_id === S.user?.id; }
 function nextActionLabel(l) { return NEXT_LABELS[l?.next_action_type] || (l?.next_action_type || 'Set next action').replace(/_/g,' '); }
+// <= today, not < today — matches the backend's overdue_all/next_actions_due
+// (api.php) so every "overdue" count and the leads actually shown for it
+// always agree. A lead due today and not yet actioned is overdue by day's end.
 function isActionOverdue(l) {
     const today = new Date().toISOString().split('T')[0];
-    return isActiveLead(l) && l?.next_action_due && l.next_action_due < today;
+    return isActiveLead(l) && l?.next_action_due && l.next_action_due <= today;
 }
 function currentProspectSurface() {
     if (!$('page-detail')?.classList.contains('hidden') && S.detailReturnPage) return S.detailReturnPage;
@@ -2014,6 +2121,43 @@ function currentProspectSurface() {
 }
 function refreshCurrentProspectSurface(reset = false) {
     return currentProspectSurface() === 'workbench' ? loadWorkbench(reset) : loadLeads(reset);
+}
+
+// Re-fetches server-computed stats (deal/pipeline dollar totals, by_status
+// counts, etc.) and re-renders the dashboard tiles if currently visible.
+// Needed after any edit to proposal_value/status, since those totals are
+// computed server-side and won't reflect the edit until refetched.
+async function refreshStats() {
+    const r = await api('stats');
+    if (!r.success) return;
+    S.lastStats = r.stats;
+    if ($('dash-stats')) renderStats(r.stats);
+    if ($('dash-pipeline')) renderPipeline(r.stats);
+}
+
+function refreshDashboardFromMemory() {
+    if (!S.lastStats) return;
+    // Recompute per-status counts from in-memory leads
+    const byStatus = {};
+    STATUSES.forEach(s => byStatus[s] = 0);
+    S.leads.forEach(l => { if (l.status && byStatus[l.status] !== undefined) byStatus[l.status]++; });
+    const won   = byStatus['won']  || 0;
+    const lost  = byStatus['lost'] || 0;
+    const total = S.leads.filter(l => !['won','lost'].includes(l.status)).length + won;
+    const st = Object.assign({}, S.lastStats, {
+        by_status: byStatus,
+        total_leads: total,
+        won,
+        lost,
+        emails_sent: S.leads.reduce((n, l) => n + (l.emails_sent || 0), 0),
+    });
+    S.lastStats = st;
+    if ($('dash-stats'))    renderStats(st);
+    if ($('dash-pipeline')) renderPipeline(st);
+    if ($('dash-focus'))    renderFocusQueue(st);
+    // Refresh filter tabs on leads/workbench page so Lost tab appears immediately
+    if ($('leads-filters'))     renderLeadFilters(null, 'leads-filters');
+    if ($('workbench-filters')) renderLeadFilters(null, 'workbench-filters');
 }
 function syncBadge(status) {
     const s = status || 'not_connected';
@@ -2038,13 +2182,14 @@ function targetActualText(t) {
 }
 function targetLabel(metric) { return TARGET_LABELS[metric] || metric.replace(/_/g,' '); }
 let confirmHandler = null;
-function openConfirm({title='Confirm', body='', okText='Confirm', danger=true, reason=false, onConfirm}) {
+function openConfirm({title='Confirm', body='', okText='Confirm', danger=true, reason=false, hideCancel=false, onConfirm}) {
     $('confirm-title').textContent = title;
     $('confirm-body').innerHTML = body;
     $('confirm-ok').textContent = okText;
     $('confirm-ok').className = danger ? 'btn btn-danger' : 'btn btn-primary';
     $('confirm-reason-wrap').classList.toggle('hidden', !reason);
     $('confirm-reason').value = '';
+    $('confirm-cancel').style.display = hideCancel ? 'none' : '';
     confirmHandler = onConfirm;
     openModal('m-confirm');
 }
@@ -2263,6 +2408,7 @@ async function checkSession() {
 function bootApp() {
     $('login-page').classList.add('hidden');
     $('app').classList.remove('hidden');
+    document.dispatchEvent(new Event('app-logged-in'));
     $('sb-name').textContent = S.user.name;
     $('sb-role').textContent = userTitle();
     $('nav-dashboard-label').textContent = S.user.role === 'sales_rep' ? 'Today' : S.user.role === 'admin' ? 'Team Control' : 'Executive';
@@ -2275,10 +2421,8 @@ function bootApp() {
         $('nav-admin-label').classList.add('hidden');
         $('nav-activity')?.classList.add('hidden');
     }
-    loadReqFields(); // Load requisite field config
-    loadMsStatus().then(refreshMicrosoftFooter);
-    loadNotifications();
-    updateChatUnreadBadge();
+    loadReqFields();
+    Promise.all([loadMsStatus(), loadNotifications(), updateChatUnreadBadge()]).then(([ms]) => { if (ms) refreshMicrosoftFooter(); });
     showPage('dashboard');
 }
 
@@ -2303,11 +2447,10 @@ async function syncMsCancellations() {
 
 async function loadDashboard() {
     showLoader('Loading dashboard...');
+    syncMsCancellations(); // fire and forget — don't block dashboard load
     try {
-        await syncMsCancellations();
-        const [st, lr, mr] = await Promise.all([api('stats'), api('leads'), api('meetings')]);
+        const [st, mr] = await Promise.all([api('stats'), api('meetings')]);
         document.querySelectorAll('.dash-extra').forEach(el => el.remove());
-        if (lr.success) { S.leads = lr.leads || []; S.leadsTotal = lr.total || 0; S.leadsPages = lr.pages || 1; }
         if (mr.success) S.meetings = mr.meetings || [];
         if (st.success) {
             S.lastStats = st.stats;
@@ -2351,6 +2494,10 @@ function renderDashboardManager(st, skipTeamPerf = false) {
 function renderDashboardAdmin(st, skipActivityCard = false, skipTeamPerf = false) {
     renderDashboardManager(st, skipTeamPerf);
     if (skipActivityCard) return;
+    // audit-log is super_admin-only server-side (view_audit_log permission) —
+    // an 'admin' user calling it always 403s and left this card stuck on
+    // "Loading..." forever with a console error on every dashboard load.
+    if (S.user?.role !== 'super_admin') return;
     const dashGrid = $('dash-pipeline')?.closest('.dash-grid');
     if (dashGrid) {
         const feedCard = document.createElement('div');
@@ -2369,7 +2516,7 @@ async function renderDashboardSuperAdmin(st) {
     $('dash-title').textContent = 'Executive Overview';
     $('dash-subtitle').textContent = 'Company-wide sales performance, governance, and integration health';
 
-    const auditR = await api('audit-log?limit=50');
+    const auditR = await api('audit-log?limit=20');
     const logs = auditR.success ? auditR.logs : [];
 
     // Remove any previously injected exec cards to prevent stacking on re-render
@@ -2452,7 +2599,7 @@ function renderOverdueBanner(st) {
     banner.id = 'dash-overdue-banner';
     banner.className = 'overdue-banner';
     const teams = ['admin','super_admin'].includes(S.user?.role) ? ` across ${new Set(myOverdue.map(l=>l.owner_id)).size} reps` : '';
-    banner.innerHTML = `<strong>&#9888; ${myOverdue.length} overdue follow-up${myOverdue.length>1?'s':''}</strong>${teams} <button class="btn-link" onclick="setFilter('');showPage('workbench')">Review now</button>`;
+    banner.innerHTML = `<strong>&#9888; ${myOverdue.length} overdue follow-up${myOverdue.length>1?'s':''}</strong>${teams} <button class="btn-link" onclick="setFilter('overdue');showPage('workbench')">Review now</button>`;
     el.parentNode.insertBefore(banner, el);
 }
 
@@ -2708,19 +2855,12 @@ function renderStats(st) {
     const won = st.won || 0;
     const rate = total > 0 ? Math.round((won/total)*100) : 0;
     const avgDS = st.avg_deal_score || 0;
-    // Calculate deal value from won leads
-    let totalDealValue = 0;
-    S.leads.filter(l => l.status === 'won' && l.won_details?.value).forEach(l => {
-        const v = l.won_details.value.replace(/[^0-9.]/g, '');
-        if (v) totalDealValue += parseFloat(v);
-    });
+    // Deal Value / Pipeline Value are computed server-side from proposal_value
+    // (falling back to won_details.value for legacy records) so these totals
+    // are always correct even when S.leads hasn't been loaded on this page yet.
+    const totalDealValue = st.won_deal_value || 0;
     const dealStr = totalDealValue > 0 ? (totalDealValue >= 1000 ? `$${(totalDealValue/1000).toFixed(0)}k` : `$${totalDealValue.toFixed(0)}`) : '$0';
-    // Pipeline value (active deal estimates)
-    let pipeValue = 0;
-    S.leads.filter(l => ['proposal_sent','negotiating','meeting_booked'].includes(l.status) && l.won_details?.value).forEach(l => {
-        const v = l.won_details.value.replace(/[^0-9.]/g, '');
-        if (v) pipeValue += parseFloat(v);
-    });
+    const pipeValue = st.pipeline_dollar_value || 0;
     const pipeStr = pipeValue > 0 ? (pipeValue >= 1000 ? `$${(pipeValue/1000).toFixed(0)}k` : `$${pipeValue.toFixed(0)}`) : '$0';
     $('dash-stats').innerHTML = `
         <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Active Prospects</div></div>
@@ -2785,21 +2925,25 @@ function renderFocusQueue() {
 // ============================================================
 
 async function fetchProspectsPage(searchId) {
-    let url = `leads&page=${S.leadsPage}&limit=50`;
-    if (S.filter) url += `&status=${encodeURIComponent(S.filter)}`;
+    let url = `leads&page=${S.leadsPage}&limit=200`;
+    // 'overdue' isn't a real lead status (it's next_action_due <= today,
+    // computed client-side by isActionOverdue across any active stage) — a
+    // literal status=overdue would match nothing server-side and return zero
+    // leads, so don't forward it as a status filter.
+    if (S.filter && S.filter !== 'overdue') url += `&status=${encodeURIComponent(S.filter)}`;
     if (S.showArchived && canManageAll()) url += '&include_archived=1';
+    if (S.leadsScope && canManageAll()) url += `&scope=${encodeURIComponent(S.leadsScope)}`;
     const search = $(searchId)?.value;
     if (search) url += `&search=${encodeURIComponent(search)}`;
-    const [leadRes, statsRes] = await Promise.all([
-        fetch(`${API}?action=${url}`, {headers:{'X-User-Token':S.user.token}}),
-        api('stats').catch(() => null)
-    ]);
-    const d = await leadRes.json();
+    const d = await fetch(`${API}?action=${url}`, {headers:{'X-User-Token':S.user.token}}).then(r => r.json());
     if (!d.success) return null;
-    if (statsRes?.success) S.lastStats = statsRes.stats;
     S.leads = d.leads;
     S.leadsTotal = d.total || 0;
     S.leadsPages = d.pages || 1;
+    S.scopedByStatus = d.by_status || {};
+    if (!S.filter) S.leadsTotalAll = S.leadsTotal;
+    // Refresh stats in background without blocking render
+    if (!S.lastStats) api('stats').then(r => { if (r?.success) S.lastStats = r.stats; }).catch(() => null);
     return d;
 }
 
@@ -2807,6 +2951,8 @@ async function loadWorkbench(reset = false) {
     if (reset) S.leadsPage = 1;
     const d = await fetchProspectsPage('workbench-search');
     if (!d) return;
+    const scopeSelect = $('workbench-scope');
+    if (scopeSelect) { scopeSelect.classList.toggle('hidden', !canManageAll()); scopeSelect.value = S.leadsScope; }
     renderLeadFilters(d, 'workbench-filters');
     renderProspectInsights('workbench-insights', 'workbench-count');
     renderLeadTable('workbench');
@@ -2816,11 +2962,12 @@ async function loadLeads(reset = false) {
     if (reset) S.leadsPage = 1;
     const d = await fetchProspectsPage('leads-search');
     if (!d) return;
-    // Show export button for privileged roles
     const btnExport = $('btn-export');
     if (btnExport) btnExport.classList.toggle('hidden', !['admin','super_admin'].includes(S.user?.role));
     const archivedToggle = $('archived-toggle');
     if (archivedToggle) archivedToggle.classList.toggle('hidden', !canManageAll());
+    const scopeSelect = $('leads-scope');
+    if (scopeSelect) { scopeSelect.classList.toggle('hidden', !canManageAll()); scopeSelect.value = S.leadsScope; }
     renderLeadFilters(d, 'leads-filters');
     renderProspectInsights('prospect-insights', 'prospect-list-count');
     renderLeadTable('list');
@@ -2852,16 +2999,32 @@ function setFilter(f) {
     refreshCurrentProspectSurface();
 }
 
+// Workbench-only label overrides so its filter tabs read the same as its
+// kanban lanes (Researched/Contacted/etc. are the Prospects page's generic
+// status names — the Workbench renames those same stages to Pipeline/Follow
+// Up/Meetings/Proposal for its lanes, and the tabs above them used to still
+// say the old names, which looked like two different sets of stages).
+const WORKBENCH_TAB_LABELS = {researched:'Pipeline', contacted:'Follow Up', meeting_booked:'Meetings', proposal_sent:'Proposal'};
+
 function renderLeadFilters(d, targetId = 'leads-filters') {
     const total = d?.total ?? S.leadsTotal ?? S.leads.length;
-    // Use by_status from stats if available, else count from current page
-    const counts = S.lastStats?.by_status || {};
+    // Grand total for "All" button — never changes when a filter is active
+    const grandTotal = S.leadsTotalAll || total;
+    // S.lastStats.by_status is company/role-wide and NOT aware of the My
+    // Leads/Team Leads scope toggle, so it could show e.g. "Qualified 1" for
+    // a lead owned by someone else while the actual (scoped) list has zero
+    // — clicking the tab then looked broken ("0 prospects"). S.scopedByStatus
+    // comes from the leads endpoint itself (computed within the same
+    // ownership/scope filtering, before the status filter narrows results),
+    // so it always matches what each tab will actually show when clicked.
+    const counts = S.leadsScope ? (S.scopedByStatus || {}) : (S.lastStats?.by_status || {});
     if (!Object.keys(counts).length) {
         S.leads.forEach(l => { counts[l.status] = (counts[l.status]||0) + 1; });
     }
-    let h = `<button class="filter-tab ${!S.filter?'active':''}" onclick="setFilter('')">All<span class="cnt">${total}</span></button>`;
+    const labels = targetId === 'workbench-filters' ? {...SL, ...WORKBENCH_TAB_LABELS} : SL;
+    let h = `<button class="filter-tab ${!S.filter?'active':''}" onclick="setFilter('')">All<span class="cnt">${grandTotal}</span></button>`;
     STATUSES.forEach(s => {
-        if (counts[s]) h += `<button class="filter-tab ${S.filter===s?'active':''}" onclick="setFilter('${s}')">${SL[s]}<span class="cnt">${counts[s]}</span></button>`;
+        if (counts[s]) h += `<button class="filter-tab ${S.filter===s?'active':''}" onclick="setFilter('${s}')">${labels[s]}<span class="cnt">${counts[s]}</span></button>`;
     });
     const target = $(targetId);
     if (target) target.innerHTML = h;
@@ -2911,12 +3074,13 @@ function renderProspectsListTable() {
             <td>
                 <div class="prospect-person">
                     <div class="prospect-avatar">${(l.first_name||'?')[0]}${(l.last_name||'?')[0]}</div>
-                    <div><div class="prospect-name">${l.first_name || ''} ${l.last_name || ''}${l.notes ? ' <span class="notes-dot" title="Has notes"></span>' : ''}</div><div class="prospect-role">${l.title || l.email || 'No title'}</div></div>
+                    <div><div class="prospect-name">${l.first_name || ''} ${l.last_name || ''}${(l.notes || hasStageNotes(l)) ? ' <span class="notes-dot" title="Has notes"></span>' : ''}</div><div class="prospect-role">${l.title || l.email || 'No title'}</div></div>
                 </div>
             </td>
             <td><div class="prospect-company"><strong>${l.company || 'No company'}</strong><span>${[l.industry,l.country].filter(Boolean).join(' · ') || '-'}</span></div></td>
             <td><span class="badge badge-${archived ? 'lost' : l.status}">${archived ? 'Archived' : (SL[l.status] || l.status)}</span></td>
-            <td class="col-next-action"><div class="next-action-cell"><strong>${nextActionLabel(l)} <span class="prospect-due ${due.cls}">· ${due.text}</span></strong><span>${l.next_action_note || 'No next action set'}</span></div></td>
+            <td class="col-deal-value">${l.proposal_value ? esc(l.proposal_value) : '<span style="color:var(--g400);">—</span>'}</td>
+            <td class="col-next-action">${['won','lost'].includes(l.status) ? '<span style="color:var(--g400);">—</span>' : `<div class="next-action-cell"><strong>${nextActionLabel(l)} <span class="prospect-due ${due.cls}">· ${due.text}</span></strong><span>${l.next_action_note || 'No next action set'}</span></div>`}</td>
             <td class="col-updated"><span title="${updated ? new Date(updated).toLocaleString() : ''}">${timeAgo(updated)}</span></td>
             <td class="col-owner"><span class="owner-chip">${l.owner_name || 'Unassigned'}</span></td>
             <td><div class="prospect-actions-row" onclick="event.stopPropagation()">${renderLeadRowActions(l)}</div></td>
@@ -2991,11 +3155,12 @@ function prospectCard(l) {
             <div class="prospect-avatar">${(l.first_name||'?')[0]}${(l.last_name||'?')[0]}</div>
             <div class="pcm-main"><div class="pcm-name">${l.first_name} ${l.last_name}</div><div class="pcm-company">${l.company || 'No company'}</div></div>
         </div>
-        <div class="pcm-next"><strong>${nextActionLabel(l)}</strong><span>${l.next_action_note || 'No next action note set'}</span></div>
+        ${['won','lost'].includes(l.status) ? '' : `<div class="pcm-next"><strong>${nextActionLabel(l)}</strong><span>${l.next_action_note || 'No next action note set'}</span></div>`}
         <div class="pcm-meta">
-            ${due ? `<span class="pcm-chip ${overdue ? 'overdue' : ''}">${overdue ? 'Overdue ' : 'Due '}${due}</span>` : '<span class="pcm-chip">No due date</span>'}
+            ${['won','lost'].includes(l.status) ? '' : (due ? `<span class="pcm-chip ${overdue ? 'overdue' : ''}">${overdue ? 'Overdue ' : 'Due '}${due}</span>` : '<span class="pcm-chip">No due date</span>')}
             <span class="pcm-chip">${l.owner_name || 'Unassigned'}</span>
-            ${l.notes ? '<span class="pcm-chip">Has notes</span>' : ''}
+            ${l.proposal_value ? `<span class="pcm-chip">Deal: ${l.proposal_value}</span>` : ''}
+            ${(l.notes || hasStageNotes(l)) ? '<span class="pcm-chip">Has notes</span>' : ''}
             ${archived ? '<span class="pcm-chip overdue">Archived</span>' : ''}
         </div>
         <div class="pcm-actions" onclick="event.stopPropagation()">${renderLeadRowActions(l)}</div>
@@ -3005,16 +3170,40 @@ function prospectCard(l) {
 function renderProspectBoard() {
     const el = $('workbench-board');
     if (!el) return;
-    const lanes = [
-        {id:'new', label:'Qualify'},
-        {id:'researched', label:'Outreach'},
-        {id:'contacted', label:'Follow Up'},
-        {id:'meeting_booked', label:'Meetings'},
+    // "Overdue" isn't a real status — it's a cross-cutting property (a lead
+    // in any active stage can be overdue). Rendered as one synthetic lane so
+    // "Review now" on the dashboard banner can show exactly the leads that
+    // make up its count, instead of dumping the full unfiltered board.
+    if (S.filter === 'overdue') {
+        const overdueLeads = S.leads.filter(isActionOverdue);
+        const rail = $('pipeline-stage-rail');
+        if (rail) rail.innerHTML = `<button class="pipeline-stage-pill active" onclick="setFilter('')">All lanes</button>`;
+        el.innerHTML = `<div class="pipeline-lane" data-lane="overdue">
+            <div class="lane-head"><strong>Overdue</strong><span class="lane-count">${overdueLeads.length}</span></div>
+            <div class="lane-body">${overdueLeads.length ? overdueLeads.map(prospectCard).join('') : '<div class="empty"><p>No prospects</p></div>'}</div>
+        </div>`;
+        return;
+    }
+    const allLanes = [
+        {id:'researched',    label:'Pipeline'},
+        {id:'new',           label:'Qualify'},
+        {id:'contacted',     label:'Follow Up'},
+        {id:'meeting_booked',label:'Meetings'},
         {id:'proposal_sent', label:'Proposal'},
-        {id:'negotiating', label:'Negotiate'},
-        {id:'nurture', label:'Nurture'},
-        {id:'won', label:'Won'},
+        {id:'nurture',       label:'Nurture'},
+        {id:'won',           label:'Won'},
+        {id:'lost',          label:'Lost'},
     ];
+    // If a specific status filter is active, only show that lane. The
+    // "Qualify" lane (id 'new') holds both new AND qualified leads (see
+    // the items filter below), so a 'qualified' status filter must also
+    // resolve to that lane — otherwise clicking the "Qualified" filter tab
+    // matches no lane id and renders an empty board.
+    const lanes = S.filter ? allLanes.filter(l => {
+        if (S.filter === 'new' || S.filter === 'qualified') return l.id === 'new';
+        return l.id === S.filter;
+    }) : allLanes;
+
     const laneItems = lanes.map(lane => ({
         ...lane,
         items: S.leads.filter(l => {
@@ -3024,13 +3213,25 @@ function renderProspectBoard() {
     }));
     const rail = $('pipeline-stage-rail');
     if (rail) {
-        rail.innerHTML = laneItems.map(lane => `<button class="pipeline-stage-pill" onclick="jumpPipelineLane('${lane.id}')">${lane.label}<span class="cnt">${lane.items.length}</span></button>`).join('');
+        // When a status filter is active, S.leads was already fetched
+        // pre-filtered to that one status (see fetchProspectsPage), so every
+        // OTHER lane's count would show 0 here — not because those stages
+        // are actually empty, but because their leads were never fetched.
+        // Show only the active lane's pill in that case, matching the board
+        // below exactly, instead of a misleading "everything else is 0" row.
+        const railLanes = S.filter ? lanes : allLanes;
+        rail.innerHTML = railLanes.map(lane => {
+            const count = S.filter === lane.id
+                ? laneItems.find(l => l.id === lane.id)?.items.length || 0
+                : S.leads.filter(l => lane.id === 'new' ? ['new','qualified'].includes(l.status) : l.status === lane.id).length;
+            if (!count && !S.filter) return '';
+            return `<button class="pipeline-stage-pill ${S.filter === lane.id ? 'active' : ''}" onclick="jumpPipelineLane('${lane.id}')">${lane.label}<span class="cnt">${count}</span></button>`;
+        }).join('');
     }
-    el.innerHTML = lanes.map(lane => {
-        const items = laneItems.find(x => x.id === lane.id)?.items || [];
+    el.innerHTML = laneItems.map(lane => {
         return `<div class="pipeline-lane" data-lane="${lane.id}">
-            <div class="lane-head"><strong>${lane.label}</strong><span class="lane-count">${items.length}</span></div>
-            <div class="lane-body">${items.length ? items.map(prospectCard).join('') : '<div class="empty"><p>No prospects</p></div>'}</div>
+            <div class="lane-head"><strong>${lane.label}</strong><span class="lane-count">${lane.items.length}</span></div>
+            <div class="lane-body">${lane.items.length ? lane.items.map(prospectCard).join('') : '<div class="empty"><p>No prospects</p></div>'}</div>
         </div>`;
     }).join('');
 }
@@ -3077,8 +3278,9 @@ function renderLeadCards() {
             </div>
             <div class="lead-card-meta">
                 <span>${l.industry||'—'}</span>
-                <span>${nextActionLabel(l)}${l.next_action_due ? ' · ' + l.next_action_due : ''}</span>
+                ${['won','lost'].includes(l.status) ? '' : `<span>${nextActionLabel(l)}${l.next_action_due ? ' · ' + l.next_action_due : ''}</span>`}
                 ${ds > 0 ? `<span>Score: ${ds}</span>` : ''}
+                ${l.proposal_value ? `<span>Deal: ${esc(l.proposal_value)}</span>` : ''}
                 ${od ? '<span style="color:var(--red);font-weight:600">Next action overdue</span>' : ''}
             </div>
             <div class="row-actions" style="margin-top:10px;" onclick="event.stopPropagation()">${renderLeadRowActions(l)}</div>
@@ -3109,6 +3311,7 @@ function exportLeads() {
     const params = new URLSearchParams({action:'export-leads', token: S.user.token});
     if (S.filter) params.append('status', S.filter);
     if (S.showArchived && canManageAll()) params.append('include_archived', '1');
+    if (S.leadsScope && canManageAll()) params.append('scope', S.leadsScope);
     const a = document.createElement('a');
     a.href = `${API}?${params.toString()}`;
     a.setAttribute('download', '');
@@ -3192,6 +3395,20 @@ function closeDetail() {
     }
 }
 
+// Any save that returns an updated lead must go through here — updating
+// S.cur alone left the Workbench board, Prospects table/cards, and
+// dashboard tiles showing stale data until a manual page refresh, since
+// several actions (research, call log, email sent, requisites) only
+// called renderDetail() and never touched S.leads or the other views.
+function applyLeadUpdate(lead) {
+    S.cur = lead;
+    const idx = S.leads.findIndex(l => l.id === lead.id);
+    if (idx >= 0) S.leads[idx] = lead;
+    renderLeadTable();
+    renderLeadCards();
+    refreshDashboardFromMemory();
+}
+
 function renderDetail() {
     const l = S.cur;
     $('det-name').textContent = `${l.first_name} ${l.last_name}`;
@@ -3213,20 +3430,37 @@ function renderDetail() {
     switchTab(S.curTab);
 }
 
+function hasStageNotes(l) {
+    return !!Object.values(l.stage_notes || {}).some(n => (n || '').trim());
+}
+
 function renderProspectNotes() {
     const el = $('det-notes');
-    if (!el || !S.cur) return;
-    el.value = S.cur.notes || '';
+    const stageSelect = $('det-notes-stage');
+    if (!el || !stageSelect || !S.cur) return;
+    const stageNotes = S.cur.stage_notes || {};
+    if (!stageSelect.dataset.built) {
+        stageSelect.innerHTML = STATUSES.map(s => `<option value="${s}">${SL[s] || s}</option>`).join('');
+        stageSelect.dataset.built = '1';
+    }
+    if (!stageSelect.value || stageSelect.dataset.leadId !== S.cur.id) {
+        stageSelect.value = S.cur.status;
+        stageSelect.dataset.leadId = S.cur.id;
+    }
+    const stage = stageSelect.value;
+    el.value = stageNotes[stage] || '';
     const status = $('notes-save-status');
-    if (status) status.textContent = S.cur.notes ? `Last saved on this prospect record.` : 'No notes yet.';
+    if (status) status.textContent = stageNotes[stage] ? `Notes saved for ${SL[stage] || stage}.` : `No notes yet for ${SL[stage] || stage}.`;
 }
 
 async function saveProspectNotes() {
     if (!S.cur?.id) return;
-    const notes = $('det-notes')?.value?.trim() || '';
+    const stage = $('det-notes-stage')?.value || S.cur.status;
+    const text = $('det-notes')?.value?.trim() || '';
+    const stageNotes = {...(S.cur.stage_notes || {}), [stage]: text};
     const status = $('notes-save-status');
     if (status) status.textContent = 'Saving...';
-    const r = await api('lead', 'PUT', {id:S.cur.id, notes});
+    const r = await api('lead', 'PUT', {id:S.cur.id, stage_notes: stageNotes});
     if (r.success) {
         S.cur = r.lead;
         const idx = S.leads.findIndex(l => l.id === S.cur.id);
@@ -3234,7 +3468,7 @@ async function saveProspectNotes() {
         renderLeadTable();
         renderLeadCards();
         if (status) status.textContent = `Saved ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
-        toast('Prospect notes saved', 'success');
+        toast('Stage notes saved', 'success');
     } else {
         if (status) status.textContent = 'Save failed.';
         toast(r.error || 'Could not save notes', 'error');
@@ -3265,7 +3499,12 @@ function renderNextActionPanel() {
     if (!target) return;
     const dueText = due ? `Due ${due}` : 'No due date set';
     const archived = isArchivedRecord(l);
-    target.innerHTML = `${archived ? `<div class="action-panel danger"><div><h3>Archived Prospect</h3><p>${l.archive_reason || 'This prospect is hidden from active queues and reporting.'}</p></div>${canManageAll()?`<button class="btn btn-sm btn-secondary" onclick="restoreLead('${l.id}')">Restore</button>`:''}</div>` : ''}<div class="action-panel ${cls}">
+    const archivedBanner = archived ? `<div class="action-panel danger"><div><h3>Archived Prospect</h3><p>${l.archive_reason || 'This prospect is hidden from active queues and reporting.'}</p></div>${canManageAll()?`<button class="btn btn-sm btn-secondary" onclick="restoreLead('${l.id}')">Restore</button>`:''}</div>` : '';
+    // A won or lost deal is closed — there's nothing left to act on, and the
+    // fields are now cleared server-side, so don't show a "set next action"
+    // prompt on a deal that's already decided.
+    if (['won', 'lost'].includes(l.status)) { target.innerHTML = archivedBanner; return; }
+    target.innerHTML = `${archivedBanner}<div class="action-panel ${cls}">
         <div>
             <h3>Next Action: ${nextActionLabel(l)}</h3>
             <p>${l.next_action_note || 'Set the next concrete sales action for this prospect.'}</p>
@@ -3315,9 +3554,6 @@ function renderStageActions() {
             break;
         case 'proposal_sent':
             actions = [{label:'Log a Call', action:'openCallLog()', cls:'btn-primary', icon:'&#128222;'}, {label:'Send Follow-up', action:"switchTab('email')", cls:'btn-secondary', icon:'&#9993;'}, {label:'Won / Lost', action:'openWonModal()', cls:'btn-ghost', icon:'&#127942;'}];
-            break;
-        case 'negotiating':
-            actions = [{label:'Log a Call', action:'openCallLog()', cls:'btn-primary', icon:'&#128222;'}, {label:'Update Freight Profile', action:'focusFreightProfile()', cls:'btn-secondary', icon:'&#128674;'}, {label:'Won / Lost', action:'openWonModal()', cls:'btn-ghost', icon:'&#127942;'}];
             break;
         case 'won':
             actions = [{label:'View Summary', action:"switchTab('activity')", cls:'btn-success', icon:'&#127942;'}];
@@ -3379,14 +3615,21 @@ function switchTab(tab) {
 function renderOverviewTab() {
     const l = S.cur;
     const due = dueLabel(l);
+    const closed = ['won','lost'].includes(l.status);
     return `<div class="popup-tab-stack">
         <div class="card popup-current-action">
-            <div class="card-head"><h3>Current Action</h3><button class="btn btn-sm btn-secondary" onclick="openModal('m-followup')">Set Follow-up</button></div>
-            <div class="current-action-grid">
-                <div><span class="field-label">Next action</span><strong>${nextActionLabel(l)}</strong><p>${l.next_action_note || 'No next action note set.'}</p></div>
-                <div><span class="field-label">Due</span><strong class="prospect-due ${due.cls}">${due.text}</strong><p>${SL[l.status] || l.status}</p></div>
-                <div><span class="field-label">Owner</span><strong>${l.owner_name || 'Unassigned'}</strong><p>${l.source || 'manual'} source</p></div>
-            </div>
+            ${closed
+                ? `<div class="card-head"><h3>${l.status === 'won' ? 'Deal Won' : 'Deal Lost'}</h3></div>
+                   <div class="current-action-grid">
+                       <div><span class="field-label">Stage</span><strong>${SL[l.status] || l.status}</strong><p>Deal is closed — no further action needed.</p></div>
+                       <div><span class="field-label">Owner</span><strong>${l.owner_name || 'Unassigned'}</strong><p>${l.source || 'manual'} source</p></div>
+                   </div>`
+                : `<div class="card-head"><h3>Current Action</h3><button class="btn btn-sm btn-secondary" onclick="openModal('m-followup')">Set Follow-up</button></div>
+                   <div class="current-action-grid">
+                       <div><span class="field-label">Next action</span><strong>${nextActionLabel(l)}</strong><p>${l.next_action_note || 'No next action note set.'}</p></div>
+                       <div><span class="field-label">Due</span><strong class="prospect-due ${due.cls}">${due.text}</strong><p>${SL[l.status] || l.status}</p></div>
+                       <div><span class="field-label">Owner</span><strong>${l.owner_name || 'Unassigned'}</strong><p>${l.source || 'manual'} source</p></div>
+                   </div>`}
         </div>
         <div class="card">
             <div class="card-head"><h3>Prospect Snapshot</h3></div>
@@ -3397,6 +3640,7 @@ function renderOverviewTab() {
                 <div class="popup-summary-item"><span class="field-label">Industry</span><strong>${l.industry || '-'}</strong></div>
                 <div class="popup-summary-item"><span class="field-label">Country</span><strong>${l.country || '-'}</strong></div>
                 <div class="popup-summary-item"><span class="field-label">Website</span><strong>${l.website ? `<a href="${l.website}" target="_blank">Open website</a>` : '-'}</strong></div>
+                <div class="popup-summary-item"><span class="field-label">Deal Value</span><strong>${l.proposal_value ? esc(l.proposal_value) : '-'}</strong></div>
             </div>
         </div>
     </div>`;
@@ -3770,7 +4014,7 @@ async function markSent() {
     const etype = document.querySelector('.et-tab.active')?.dataset?.etype || 'introduction';
     const r = await api('save-email', 'POST', {lead_id:S.cur.id, subject:$('em-subject').value, body:$('em-body').value, email_type:etype});
     if (r.success) {
-        S.cur = r.lead;
+        applyLeadUpdate(r.lead);
         toast('Email recorded', 'success');
         renderDetail();
         $('post-send').innerHTML = `<div class="post-prompt"><h4>&#10003; Email recorded. What's next?</h4><div class="pp-options"><button class="btn btn-primary btn-sm" onclick="openModal('m-followup')">Set Follow-up Date</button><button class="btn btn-secondary btn-sm" onclick="openCallLog()">Log a Call</button><button class="btn btn-secondary btn-sm" onclick="openMeetingForm()">Book Meeting</button><button class="btn btn-ghost btn-sm" onclick="$('post-send').innerHTML=''">Done</button></div></div>`;
@@ -3878,7 +4122,7 @@ async function saveCallLog() {
 
     const r = await api('save-call-log', 'POST', {lead_id:S.cur.id, duration:parseInt(duration), outcome, notes, discussed_topics:topics, requisites});
     if (r.success) {
-        S.cur = r.lead;
+        applyLeadUpdate(r.lead);
         toast('Call logged', 'success');
         closeModal('m-log-call');
         renderDetail();
@@ -4030,6 +4274,7 @@ function renderContact() {
         {l:'Phone',v:l.phone?`<a href="tel:${l.phone}">${l.phone}</a>`:'-'},
         {l:'Industry',v:l.industry||'-'},{l:'Country',v:l.country||'-'},
         {l:'Owner',v:ownerVal},
+        {l:'Deal Value',v:l.proposal_value?esc(l.proposal_value):'Not set'},
         {l:'Emails',v:l.emails_sent||0},{l:'Calls',v:(l.call_logs||[]).length},
         {l:'Follow-up',v:l.followup_date||'Not set'},
         {l:'Created',v:l.created_at?new Date(l.created_at).toLocaleDateString():'-'}
@@ -4110,19 +4355,32 @@ function focusFreightProfile() {
 
 function renderSOP() {
     const sopMap = {
-        new: {id:'sop_new', name:'New Prospect Qualification', steps:['Verify contact info','Run AI Research','Check for duplicates','Classify prospect type','Determine trade lanes','Add initial notes']},
-        researched: {id:'sop_res', name:'First Contact', steps:['Review AI research','Choose email type','Personalize with freight data','Send via Outlook','Set follow-up (3-5 days)']},
-        contacted: {id:'sop_con', name:'Follow-up', steps:['Make follow-up call','Log call outcome','Update freight profile','Set next follow-up']},
-        meeting_booked: {id:'sop_mtg', name:'Meeting Prep', steps:['Review all history','Prepare rate/quote','Identify 3 pain points','Have M&M overview ready','Confirm 24h before']},
-        proposal_sent: {id:'sop_prop', name:'Post-Proposal', steps:['Follow up within 3 days','Address objections','Update freight profile','Get decision timeline']}
+        new:           {id:'sop_new',  name:'New Prospect Qualification', icon:'🔍', steps:['Verify contact info','Run AI Research','Check for duplicates','Classify prospect type','Determine trade lanes','Add initial notes']},
+        qualified:     {id:'sop_qual', name:'Qualification', icon:'✅', steps:['Confirm company size & fit','Identify decision maker','Check freight volume potential','Set deal score estimate']},
+        researched:    {id:'sop_res',  name:'First Contact', icon:'✉️', steps:['Review AI research','Choose email type','Personalize with freight data','Send via Outlook','Set follow-up (3-5 days)']},
+        contacted:     {id:'sop_con',  name:'Follow-up', icon:'📞', steps:['Make follow-up call','Log call outcome','Update freight profile','Set next follow-up']},
+        meeting_booked:{id:'sop_mtg',  name:'Meeting Prep', icon:'📅', steps:['Review all history','Prepare rate/quote','Identify 3 pain points','Have M&M overview ready','Confirm 24h before']},
+        proposal_sent: {id:'sop_prop', name:'Post-Proposal', icon:'📄', steps:['Follow up within 3 days','Address objections','Update freight profile','Get decision timeline']},
     };
     const sop = sopMap[S.cur.status];
-    if (!sop) { $('det-sop').innerHTML = '<p style="font-size:12px;color:var(--g400);">No checklist for this stage</p>'; return; }
+    const el = $('det-sop');
+    if (!sop) { el.innerHTML = '<p style="font-size:12px;color:var(--g400);padding:4px 0;">No checklist for this stage.</p>'; return; }
     const prog = S.cur.sop_progress || {};
-    $('det-sop').innerHTML = `<h4 style="font-size:12px;font-weight:600;color:var(--g700);margin-bottom:8px;">${sop.name}</h4>` + sop.steps.map((s, i) => {
-        const ck = prog[`${sop.id}_${i}`];
-        return `<div class="sop-step ${ck?'checked':''}"><input type="checkbox" ${ck?'checked':''} onchange="toggleSOP('${sop.id}',${i},this.checked)"><span>${s}</span></div>`;
-    }).join('');
+    const done = sop.steps.filter((_, i) => prog[`${sop.id}_${i}`]).length;
+    const total = sop.steps.length;
+    const pct = Math.round((done / total) * 100);
+    el.innerHTML = `
+        <div class="sop-stage-label">${sop.icon} ${sop.name}</div>
+        <div class="sop-progress-label"><span>${done} of ${total} done</span><span>${pct}%</span></div>
+        <div class="sop-progress-bar"><div class="sop-progress-fill" style="width:${pct}%"></div></div>
+        ${sop.steps.map((s, i) => {
+            const ck = !!prog[`${sop.id}_${i}`];
+            return `<div class="sop-step ${ck?'checked':''}" onclick="toggleSOP('${sop.id}',${i},${!ck})">
+                <input type="checkbox" ${ck?'checked':''} onchange="toggleSOP('${sop.id}',${i},this.checked)" onclick="event.stopPropagation()">
+                <span class="sop-step-num">${ck ? '✓' : i+1}</span>
+                <span class="sop-step-text">${s}</span>
+            </div>`;
+        }).join('')}`;
 }
 
 async function toggleSOP(sid, idx, ck) {
@@ -4144,6 +4402,7 @@ async function updateStatus(s) {
         renderLeadTable();
         renderLeadCards();
         renderDetail();
+        refreshDashboardFromMemory();
         toast(`Status: ${SL[s]}`, 'success');
     }
 }
@@ -4153,7 +4412,7 @@ async function doResearch() {
     const r = await api('enrich-lead', 'POST', {lead_id:S.cur.id});
     hideLoader();
     if (r.success) {
-        S.cur = r.lead;
+        applyLeadUpdate(r.lead);
         // Auto-populate freight profile from research
         if (r.enrichment?.freight_fit) {
             const ff = r.enrichment.freight_fit;
@@ -4182,7 +4441,7 @@ async function getAIRecommendation() {
     const r = await api('ai-recommend', 'POST', {lead_id:S.cur.id});
     hideLoader();
     if (r.success) {
-        S.cur = r.lead;
+        applyLeadUpdate(r.lead);
         renderDetail();
         toast(`Deal Score: ${r.recommendation.deal_score}`, 'success');
     } else toast(r.error || 'Failed', 'error');
@@ -4207,7 +4466,7 @@ async function saveWon() {
         start_date: $('won-date')?.value || new Date().toISOString().slice(0,10),
         notes: $('won-notes')?.value?.trim() || ''
     };
-    const r = await api('lead', 'PUT', {id:S.cur.id, status:'won', won_details:details});
+    const r = await api('lead', 'PUT', {id:S.cur.id, status:'won', won_details:details, proposal_value:value});
     if (r.success) {
         S.cur = r.lead;
         const idx = S.leads.findIndex(l => l.id === r.lead.id);
@@ -4220,6 +4479,8 @@ async function saveWon() {
         renderLeadTable();
         renderLeadCards();
         renderDetail();
+        refreshDashboardFromMemory();
+        refreshStats();
     } else toast(r.error, 'error');
 }
 
@@ -4237,6 +4498,7 @@ async function saveLost() {
         renderLeadTable();
         renderLeadCards();
         renderDetail();
+        refreshDashboardFromMemory();
     } else toast(r.error, 'error');
 }
 
@@ -4260,6 +4522,7 @@ async function openEditLead(id=null) {
     $('ed-next-due').value = l.next_action_due || '';
     $('ed-next-note').value = l.next_action_note || '';
     $('ed-notes').value = l.notes||'';
+    $('ed-proposal-value').value = l.proposal_value||'';
     $('ed-status').innerHTML = STATUSES.map(s => `<option value="${s}" ${l.status===s?'selected':''}>${SL[s]}</option>`).join('');
     $('ed-next-type').innerHTML = Object.entries(NEXT_LABELS).map(([k,v]) => `<option value="${k}" ${l.next_action_type===k?'selected':''}>${v}</option>`).join('');
     const owner = $('ed-owner');
@@ -4280,7 +4543,7 @@ async function openEditLead(id=null) {
 async function saveLead() {
     const ownerId = $('ed-owner').value;
     const member = S.teamMembers.find(m => m.id === ownerId);
-    const d = {id:$('ed-id').value || S.cur?.id, first_name:$('ed-fn').value.trim(), last_name:$('ed-ln').value.trim(), email:$('ed-email').value.trim(), phone:$('ed-phone').value.trim(), company:$('ed-company').value.trim(), title:$('ed-title').value.trim(), industry:$('ed-industry').value.trim(), country:$('ed-country').value.trim(), website:$('ed-website').value.trim(), linkedin:$('ed-linkedin').value.trim(), source:$('ed-source').value.trim(), status:$('ed-status').value, followup_date:$('ed-followup').value, next_action_type:$('ed-next-type').value, next_action_due:$('ed-next-due').value, next_action_note:$('ed-next-note').value.trim(), notes:$('ed-notes').value.trim()};
+    const d = {id:$('ed-id').value || S.cur?.id, first_name:$('ed-fn').value.trim(), last_name:$('ed-ln').value.trim(), email:$('ed-email').value.trim(), phone:$('ed-phone').value.trim(), company:$('ed-company').value.trim(), title:$('ed-title').value.trim(), industry:$('ed-industry').value.trim(), country:$('ed-country').value.trim(), website:$('ed-website').value.trim(), linkedin:$('ed-linkedin').value.trim(), source:$('ed-source').value.trim(), status:$('ed-status').value, followup_date:$('ed-followup').value, next_action_type:$('ed-next-type').value, next_action_due:$('ed-next-due').value, next_action_note:$('ed-next-note').value.trim(), notes:$('ed-notes').value.trim(), proposal_value:$('ed-proposal-value').value.trim()};
     if (canManageAll() && ownerId) {
         d.owner_id = ownerId;
         d.owner_name = member?.name || $('ed-owner').selectedOptions[0]?.textContent || '';
@@ -4293,6 +4556,7 @@ async function saveLead() {
         renderLeadTable(); renderLeadCards();
         closeModal('m-edit-lead');
         toast('Prospect updated', 'success');
+        refreshStats();
     } else toast(r.error, 'error');
 }
 
@@ -4356,7 +4620,7 @@ async function saveFollowup() {
         next_action_note:$('fu-note')?.value?.trim() || 'Follow up with client'
     };
     const r = await api('lead', 'PUT', payload);
-    if (r.success) { S.cur = r.lead; renderDetail(); closeModal('m-followup'); toast('Next action set', 'success'); }
+    if (r.success) { applyLeadUpdate(r.lead); renderDetail(); closeModal('m-followup'); toast('Next action set', 'success'); }
 }
 
 // ===== MEETINGS =====
@@ -4502,7 +4766,7 @@ async function loadOutlookEvents() {
     const d = await r.json();
     if (d.success) S.outlookEvents = d.events || [];
 }
-function openMeetingForm(dateKey='') {
+async function openMeetingForm(dateKey='') {
     loadMsStatus().then(() => updateMeetingIntegrationStatus());
     $('mtg-id').value = '';
     $('mtg-modal-title').textContent = 'Book Meeting';
@@ -4516,13 +4780,12 @@ function openMeetingForm(dateKey='') {
         const base = dateKey || new Date().toISOString().slice(0,10);
         $('mtg-dt').value = `${base}T09:00`;
     }
-    loadLeadOptions().then(() => {
-        if (S.cur) {
-            $('mtg-lead').value = S.cur.id;
-            $('mtg-title').value = `Discovery meeting with ${S.cur.first_name} ${S.cur.last_name}`;
-            if ($('mtg-attendees')) $('mtg-attendees').value = S.cur.email || '';
-        }
-    });
+    await loadLeadOptions();
+    if (S.cur) {
+        $('mtg-lead').value = S.cur.id;
+        $('mtg-title').value = `Discovery meeting with ${S.cur.first_name} ${S.cur.last_name}`;
+        if ($('mtg-attendees')) $('mtg-attendees').value = S.cur.email || '';
+    }
     // Reset meeting type to Phone
     document.querySelectorAll('.mtg-type-card').forEach(c => c.classList.remove('selected'));
     document.querySelector('.mtg-type-card[data-type="phone"]')?.classList.add('selected');
@@ -4571,7 +4834,7 @@ function updateMeetingIntegrationStatus() {
     }
 }
 async function loadLeadOptions() {
-    const r = await api('leads');
+    const r = await api('leads&page=1&limit=500');
     if (!r.success) return;
     $('mtg-lead').innerHTML = '<option value="">-- Select prospect --</option>' + r.leads.map(l => `<option value="${l.id}">${l.first_name} ${l.last_name} (${l.company})</option>`).join('');
 }
@@ -4614,8 +4877,13 @@ async function bookMeeting() {
         else { msg = 'Meeting booked (platform-only, no Outlook invite)'; toastType = 'success'; }
         toast(msg, toastType);
         closeModal('m-meeting');
-        if (S.cur && d.lead_id === S.cur.id) openDetail(S.cur.id);
         loadMeetings();
+        // Refresh leads so status change (e.g. meeting_booked) is reflected everywhere
+        const lr = await api('leads&page=1&limit=500');
+        if (lr.success) S.leads = lr.leads;
+        if (S.cur && d.lead_id === S.cur.id) openDetail(S.cur.id);
+        if (S.page === 'workbench') { renderLeadTable('workbench'); renderProspectBoard(); }
+        if (S.page === 'leads') renderLeadTable('leads');
     } else toast(r.error, 'error');
 }
 async function archiveMeeting(id) {
@@ -4866,31 +5134,198 @@ function restoreUserFromModal() { restoreUser($('eu-id').value); }
 function hardDeleteUserFromModal() { hardDeleteUser($('eu-id').value); }
 async function toggleUser(id, active) { await api('update-user', 'POST', {id, is_active:active}); loadUsers(); }
 
-// ===== CSV IMPORT =====
-async function importCSV() {
-    const f = $('csv-file');
-    if (!f.files.length) return toast('Select a CSV file', 'error');
-    const txt = await f.files[0].text();
-    const lines = txt.split('\n').filter(l => l.trim());
-    if (lines.length < 2) return toast('CSV empty', 'error');
-    const hdr = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
-    const leads = [];
-    for (let i = 1; i < lines.length; i++) {
-        const v = parseCSV(lines[i]);
-        const row = {};
-        hdr.forEach((h, j) => { row[h] = v[j] || ''; });
-        if (row.first_name || row.company || row.email) leads.push(row);
-    }
-    if (!leads.length) return toast('No valid prospects', 'error');
-    $('btn-import').disabled = true; $('btn-import').textContent = `Importing ${leads.length}...`;
-    const r = await api('import', 'POST', {leads});
-    $('btn-import').disabled = false; $('btn-import').textContent = 'Import';
-    if (r.success) { toast(`Imported ${r.imported}. ${r.duplicates_skipped} dupes skipped.`, 'success'); closeModal('m-import'); loadLeads(); } else toast(r.error, 'error');
+function openImportCSV() {
+    if ($('csv-file')) $('csv-file').value = '';
+    if ($('import-mapping')) $('import-mapping').style.display = 'none';
+    if ($('import-preview')) $('import-preview').style.display = 'none';
+    _importRawRows = []; _importData = [];
+    openModal('m-import');
 }
-function parseCSV(line) {
-    const r = []; let c = '', q = false;
-    for (let i = 0; i < line.length; i++) { const ch = line[i]; if (ch === '"') q = !q; else if (ch === ',' && !q) { r.push(c.trim()); c = ''; } else c += ch; }
-    r.push(c.trim()); return r;
+
+// ===== CSV / EXCEL IMPORT WITH FIELD MAPPING =====
+const CSV_FIELDS = [
+    {value:'',          label:'— Skip —'},
+    {value:'first_name',label:'First Name'},
+    {value:'last_name', label:'Last Name'},
+    {value:'email',     label:'Email'},
+    {value:'phone',     label:'Phone'},
+    {value:'company',   label:'Company'},
+    {value:'title',     label:'Job Title'},
+    {value:'industry',  label:'Industry'},
+    {value:'country',   label:'Country'},
+    {value:'website',   label:'Website'},
+    {value:'linkedin',  label:'LinkedIn URL'},
+    {value:'notes',     label:'Notes'},
+];
+
+function csvGuessField(col) {
+    const c = col.toLowerCase().replace(/[\s_\-\.]+/g,'');
+    const map = {
+        // First name
+        firstname:'first_name', fname:'first_name', givenname:'first_name', first:'first_name',
+        // Last name
+        lastname:'last_name', lname:'last_name', surname:'last_name', familyname:'last_name', last:'last_name',
+        // Email
+        primaryworkemail:'email', primaryemail:'email', workemail:'email', businessemail:'email',
+        email:'email', emailaddress:'email', emailid:'email',
+        emailaddress1:'email',                        // Salesforce/LinkedIn
+        // Phone
+        primarymobilenumber:'phone', primarymobile:'phone', mobilenumber:'phone',
+        mobile:'phone', phone:'phone', tel:'phone', phonenumber:'phone', contactnumber:'phone',
+        directphone:'phone', workphone:'phone', officephone:'phone', businessphone:'phone', mobilephone:'phone',
+        phone1:'phone', phonenumber1:'phone', mobilephonenumber:'phone',   // Salesforce/LinkedIn
+        // Company
+        company:'company', organisation:'company', organization:'company', companyname:'company',
+        account:'company', accountname:'company', employer:'company',
+        associatedcompany:'company', organizationname:'company',            // HubSpot/Apollo
+        // Title
+        title:'title', jobtitle:'title', designation:'title', position:'title', role:'title',
+        currentposition:'title', currentrole:'title', persontitle:'title',  // LinkedIn/Apollo
+        // Industry
+        companyindustries:'industry', industries:'industry', industry:'industry', sector:'industry', vertical:'industry',
+        organizationindustry:'industry', primaryindustry:'industry',        // Apollo
+        // Country
+        country:'country', countryregion:'country', countryofoperation:'country',
+        countrycode:'country', mailingcountry:'country', billingcountry:'country', // Salesforce
+        // Website
+        website:'website', companywebsite:'website', url:'website', web:'website', homepage:'website',
+        websiteurl:'website', organizationwebsite:'website',                // Apollo
+        // LinkedIn
+        linkedin:'linkedin', linkedinurl:'linkedin', linkedinprofile:'linkedin',
+        linkedinpersonlink:'linkedin', profileurl:'linkedin', publicprofileurl:'linkedin',
+        linkedinprofileurl:'linkedin',                                       // Apollo
+        firmablepersonlink:'', firmablepersonlinkurl:'',                     // Firmable internal URL — skip
+        // Notes
+        notes:'notes', comments:'notes', description:'notes', headline:'notes', skills:'notes',
+        summary:'notes', bio:'notes', about:'notes',
+    };
+    return map[c] || '';
+}
+
+function parseCSVFull(text) {
+    const rows = [];
+    let cur = '', inQ = false, fields = [];
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+            if (inQ && text[i+1] === '"') { cur += '"'; i++; }
+            else inQ = !inQ;
+        } else if (ch === ',' && !inQ) {
+            fields.push(cur); cur = '';
+        } else if ((ch === '\n' || (ch === '\r' && text[i+1] === '\n')) && !inQ) {
+            if (ch === '\r') i++;
+            fields.push(cur); cur = '';
+            rows.push(fields); fields = [];
+        } else {
+            cur += ch;
+        }
+    }
+    if (cur || fields.length) { fields.push(cur); rows.push(fields); }
+    return rows;
+}
+
+let _importRawRows = [], _importData = [];
+
+function handleImportFile(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const name = f.name.toLowerCase();
+    const isExcel = name.endsWith('.xlsx') || name.endsWith('.xls');
+    const isCsv = name.endsWith('.csv');
+    if (!isExcel && !isCsv) return toast('Please upload a CSV or Excel file (.csv, .xlsx, .xls)', 'error');
+    const r = new FileReader();
+    r.onload = ev => {
+        let rows2d;
+        if (isExcel) {
+            if (typeof XLSX === 'undefined') return toast('Excel library not loaded, please refresh and try again', 'error');
+            const wb = XLSX.read(ev.target.result, {type:'array'});
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            rows2d = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        } else {
+            rows2d = parseCSVFull(ev.target.result);
+        }
+        if (!rows2d || rows2d.length < 2) return toast('File appears empty', 'error');
+        const headers = rows2d[0].map(x => String(x).trim());
+        _importRawRows = [];
+        for (let i = 1; i < rows2d.length; i++) {
+            const row = {};
+            headers.forEach((k, j) => row[k] = String(rows2d[i][j] ?? '').trim());
+            if (headers.some(h => (row[h]||'').trim().length > 1)) _importRawRows.push(row);
+        }
+        if (!_importRawRows.length) return toast('No data rows found', 'error');
+        showImportMapping(headers);
+    };
+    isExcel ? r.readAsArrayBuffer(f) : r.readAsText(f);
+}
+
+function showImportMapping(headers) {
+    $('mapping-rows').innerHTML = headers.map(h => {
+        const guess = csvGuessField(h);
+        const dot = guess
+            ? `<span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;margin-top:3px;"></span>`
+            : `<span style="width:8px;height:8px;border-radius:50%;background:var(--g300);display:inline-block;flex-shrink:0;margin-top:3px;"></span>`;
+        const sample = _importRawRows.slice(0,3).map(row => row[h]).filter(x => x && x.length < 60).join(', ');
+        const opts = CSV_FIELDS.map(f => `<option value="${f.value}"${f.value===guess?' selected':''}>${f.label}</option>`).join('');
+        return `<div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);">
+            <div style="padding:12px 16px;display:flex;align-items:flex-start;gap:10px;">
+                <div style="margin-top:3px;">${dot}</div>
+                <div>
+                    <div style="font-size:13px;font-weight:500;">${h}</div>
+                    <div style="font-size:11px;color:var(--g400);margin-top:3px;">${sample||'—'}</div>
+                </div>
+            </div>
+            <div style="padding:10px 16px;border-left:1px solid var(--border);display:flex;align-items:center;">
+                <select class="mapping-select" data-col="${h}" style="font-size:13px;width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;">${opts}</select>
+            </div>
+        </div>`;
+    }).join('');
+    $('mapping-lead-count').textContent = `${_importRawRows.length} leads found in your file`;
+    $('import-mapping').style.display = 'block';
+    $('import-preview').style.display = 'none';
+}
+
+function csvApplyMapping() {
+    const selects = document.querySelectorAll('.mapping-select');
+    const mapping = {};
+    selects.forEach(s => { if (s.value) mapping[s.dataset.col] = s.value; });
+    if (!Object.values(mapping).includes('first_name') && !Object.values(mapping).includes('email') && !Object.values(mapping).includes('company')) {
+        return toast('Map at least one of: First Name, Email, or Company', 'error');
+    }
+    _importData = _importRawRows.map(row => {
+        const out = {};
+        Object.entries(mapping).forEach(([col, field]) => { out[field] = row[col] || ''; });
+        return out;
+    }).filter(r => Object.values(r).some(x => x));
+    if (!_importData.length) return toast('No data after mapping', 'error');
+    $('preview-count').textContent = _importData.length;
+    $('preview-table-body').innerHTML = _importData.slice(0, 8).map((x, i) =>
+        `<tr style="background:${i%2===1?'var(--g50)':''};">
+            <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${(x.first_name||'')+' '+(x.last_name||'')}</td>
+            <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--g500);">${x.email||'—'}</td>
+            <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${x.company||'—'}</td>
+            <td style="padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;">${x.phone||'—'}</td>
+        </tr>`
+    ).join('');
+    $('import-preview').style.display = 'block';
+    setTimeout(() => $('import-preview').scrollIntoView({behavior:'smooth', block:'start'}), 50);
+}
+
+async function csvConfirmImport() {
+    if (!_importData.length) return toast('No data to import', 'error');
+    $('btn-import').disabled = true;
+    $('btn-import').textContent = `Importing ${_importData.length}...`;
+    const r = await api('import', 'POST', {leads: _importData});
+    $('btn-import').disabled = false;
+    $('btn-import').textContent = 'Import';
+    if (r.success) {
+        toast(`Imported ${r.imported}. ${r.duplicates_skipped||0} dupes skipped.`, 'success');
+        _importRawRows = []; _importData = [];
+        $('csv-file').value = '';
+        $('import-mapping').style.display = 'none';
+        $('import-preview').style.display = 'none';
+        closeModal('m-import');
+        loadLeads();
+    } else toast(r.error, 'error');
 }
 
 // ===== MEETING TYPE SELECTION =====
@@ -5071,7 +5506,12 @@ let chatChannelData = [];
 let chatDmData = [];
 
 async function loadChat() {
-    await Promise.all([loadChatChannels(), loadChatDms()]);
+    // #client-reference autocomplete needs S.leads, which is otherwise only
+    // populated by visiting Leads/Workbench — fetch it here too so typing #
+    // works even if Chat is the first page opened this session.
+    const chatTasks = [loadChatChannels(), loadChatDms()];
+    if (!S.leads.length) chatTasks.push(fetchProspectsPage(null));
+    await Promise.all(chatTasks);
     openChatThread('channel_general', 'general', false, '');
     if (window.innerWidth <= 768) {
         document.getElementById('chat-wrapper')?.classList.remove('show-conversation');
@@ -5084,6 +5524,8 @@ async function loadChatChannels() {
     chatChannelData = r.channels;
     const list = document.getElementById('chat-channel-list');
     const isAdmin = ['admin','super_admin'].includes(S.user?.role);
+    const newBtn = document.getElementById('chat-new-channel-btn');
+    if (newBtn) newBtn.style.display = isAdmin ? '' : 'none';
     list.innerHTML = '';
     r.channels.forEach(ch => {
         const el = document.createElement('div');
@@ -5168,6 +5610,26 @@ function buildMessageEl(m, grouped) {
     const safeText = esc(m.text)
         // Highlight @FirstName or @First Last (capitalised second word), not trailing prose.
         .replace(/@([A-Za-z0-9_][A-Za-z0-9_\-]*(?:\s+[A-Z][A-Za-z0-9_\-]*)?)/g, (match) => `<span class="chat-mention">${match}</span>`)
+        // Highlight #ClientName references and link them to the matching lead(s).
+        // Matched against real client full names (any word count) rather than a
+        // fixed word-boundary pattern, so multi-word names resolve — longest name
+        // first, so e.g. "Florence Ortiz Jones" wins over a shorter "Florence" match.
+        .replace(/#([A-Za-z0-9_][A-Za-z0-9_\- ]*)/g, (match, rest) => {
+            const names = [...new Set((S.leads || [])
+                .map(l => `${l.first_name || ''} ${l.last_name || ''}`.trim())
+                .filter(Boolean))]
+                .sort((a, b) => b.length - a.length);
+            // rest is already HTML-escaped (this runs after esc(m.text)), so compare
+            // against the escaped form of each client name, not the raw name.
+            const hit = names.find(n => rest.toLowerCase().startsWith(esc(n).toLowerCase()));
+            if (!hit) return match;
+            const ids = (S.leads || []).filter(l => `${l.first_name || ''} ${l.last_name || ''}`.trim() === hit).map(l => l.id);
+            const idsAttr = JSON.stringify(ids).replace(/"/g, '&quot;');
+            const hitLen = esc(hit).length;
+            const tag = rest.slice(0, hitLen);
+            const tail = rest.slice(hitLen);
+            return `<span class="chat-client-ref" onclick="event.stopPropagation();openClientRef(JSON.parse(this.dataset.ids))" data-ids="${idsAttr}">#${tag}</span>${tail}`;
+        })
         .replace(/\n/g, '<br>');
 
     let fileHtml = '';
@@ -5500,7 +5962,7 @@ function cancelStagedFile() {
     if (stagedPreviewUrl) { URL.revokeObjectURL(stagedPreviewUrl); stagedPreviewUrl = null; }
     const preview = document.getElementById('chat-file-preview');
     if (preview) { preview.innerHTML = ''; preview.style.display = 'none'; }
-    document.getElementById('chat-input').placeholder = 'Message... use @ to mention someone';
+    document.getElementById('chat-input').placeholder = 'Message... use @ to mention someone, # to reference a client';
 }
 
 async function sendStagedFile(caption) {
@@ -5535,7 +5997,12 @@ function chatInputKeydown(e) {
         if (e.key === 'ArrowUp')   { e.preventDefault(); moveMentionSelection(-1); return; }
         if (e.key === 'Enter' || e.key === 'Tab') {
             const active = picker.querySelector('.mention-item.active');
-            if (active) { e.preventDefault(); insertMention(active.dataset.name); return; }
+            if (active) {
+                e.preventDefault();
+                if (active.dataset.type === 'client') insertClientRef(active.dataset.name);
+                else insertMention(active.dataset.name);
+                return;
+            }
         }
         if (e.key === 'Escape') { picker.innerHTML = ''; return; }
     }
@@ -5553,8 +6020,25 @@ function handleMentionTyping(input) {
     const val = input.value;
     const pos = input.selectionStart;
     const before = val.substring(0, pos);
-    const mentionMatch = before.match(/@([a-zA-Z0-9_\- ]*)$/);
     const picker = document.getElementById('mention-picker');
+
+    const clientMatch = before.match(/#([a-zA-Z0-9_\- ]*)$/);
+    if (clientMatch) {
+        const query = clientMatch[1].toLowerCase();
+        const named = (S.leads || []).filter(l => (l.first_name || l.last_name));
+        const filtered = (query ? named.filter(l => `${l.first_name||''} ${l.last_name||''}`.toLowerCase().includes(query)) : named.slice(0, 8));
+        if (!filtered.length) { if (picker) picker.innerHTML = ''; return; }
+        picker.innerHTML = filtered.map((l, i) => {
+            const name = `${l.first_name || ''} ${l.last_name || ''}`.trim();
+            return `<div class="mention-item${i===0?' active':''}" data-name="${esc(name)}" data-type="client" onclick="insertClientRef('${esc(name)}')">
+                <div style="width:24px;height:24px;border-radius:4px;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;">${(l.first_name||'?')[0].toUpperCase()}</div>
+                <span>${esc(name)}${l.company ? ` <span style="color:var(--g500);font-weight:400;">— ${esc(l.company)}</span>` : ''}</span>
+            </div>`;
+        }).join('');
+        return;
+    }
+
+    const mentionMatch = before.match(/@([a-zA-Z0-9_\- ]*)$/);
     if (!mentionMatch || chatState.isDm) { if (picker) picker.innerHTML = ''; return; }
     const query = mentionMatch[1].toLowerCase();
     const names = chatDmData.map(t => t.user_name);
@@ -5588,6 +6072,88 @@ function insertMention(name) {
     document.getElementById('mention-picker').innerHTML = '';
 }
 
+function insertClientRef(name) {
+    const input = document.getElementById('chat-input');
+    const val = input.value;
+    const pos = input.selectionStart;
+    const before = val.substring(0, pos).replace(/#[a-zA-Z0-9_\- ]*$/, '#' + name + ' ');
+    const after = val.substring(pos);
+    input.value = before + after;
+    input.selectionStart = input.selectionEnd = before.length;
+    input.focus();
+    document.getElementById('mention-picker').innerHTML = '';
+}
+
+// Visible "Reference a client" button next to the chat input — same result
+// as typing #, but discoverable without knowing the # shortcut exists.
+async function openClientRefPicker() {
+    if (!S.leads.length) await fetchProspectsPage(null);
+    $('client-ref-search').value = '';
+    renderClientRefList();
+    openModal('m-client-ref');
+    setTimeout(() => $('client-ref-search')?.focus(), 50);
+}
+
+function renderClientRefList() {
+    const q = ($('client-ref-search')?.value || '').toLowerCase();
+    const list = $('client-ref-list');
+    if (!list) return;
+    const leads = (S.leads || []).filter(l => !q ||
+        `${l.first_name || ''} ${l.last_name || ''}`.toLowerCase().includes(q) ||
+        (l.company || '').toLowerCase().includes(q)
+    );
+    if (!leads.length) { list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--g500);font-size:13px;">No clients found</div>'; return; }
+    list.innerHTML = leads.map(l => `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background=''">
+            <div style="min-width:0;">
+                <div style="font-weight:500;font-size:14px;">${esc(l.first_name || '')} ${esc(l.last_name || '')}</div>
+                <div style="font-size:12px;color:var(--g500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(l.company || 'No company')}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="btn btn-sm btn-secondary" onclick="pickClientRefToInsert('${l.id}')">Insert</button>
+                <button class="btn btn-sm btn-primary" onclick="closeModal('m-client-ref');openDetail('${l.id}')">Open</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function pickClientRefToInsert(id) {
+    const lead = (S.leads || []).find(l => l.id === id);
+    closeModal('m-client-ref');
+    const name = `${lead?.first_name || ''} ${lead?.last_name || ''}`.trim();
+    if (!lead || !name) return;
+    const input = document.getElementById('chat-input');
+    const before = input.value;
+    input.value = before + (before && !before.endsWith(' ') ? ' ' : '') + '#' + name + ' ';
+    input.focus();
+    input.selectionStart = input.selectionEnd = input.value.length;
+}
+
+// Click handler for a rendered #ClientName reference in a chat message.
+// Single match opens the lead directly; multiple leads sharing that exact
+// name show a small chooser instead of guessing which one was meant.
+function openClientRef(ids) {
+    if (ids.length === 1) { openDetail(ids[0]); return; }
+    const leads = ids.map(id => (S.leads || []).find(l => l.id === id)).filter(Boolean);
+    const existing = document.getElementById('client-ref-picker');
+    if (existing) existing.remove();
+    const picker = document.createElement('div');
+    picker.id = 'client-ref-picker';
+    picker.style.cssText = 'position:fixed;z-index:2000;background:var(--bg-white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);padding:6px;max-width:260px;';
+    picker.innerHTML = `<div style="font-size:11px;color:var(--g500);padding:4px 8px;">Multiple matches — choose one</div>` + leads.map(l =>
+        `<div class="mention-item" style="cursor:pointer;" onclick="document.getElementById('client-ref-picker').remove();openDetail('${l.id}')">
+            <span>${esc(l.first_name || '')} ${esc(l.last_name || '')} — ${esc(l.company || '')}</span>
+        </div>`
+    ).join('');
+    document.body.appendChild(picker);
+    const rect = (window.event?.target || document.body).getBoundingClientRect();
+    picker.style.left = rect.left + 'px';
+    picker.style.top = (rect.bottom + 4) + 'px';
+    setTimeout(() => document.addEventListener('click', function closeOnce(e) {
+        if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('click', closeOnce); }
+    }), 0);
+}
+
 let _channelEditId = null; // null = create mode, string = edit mode
 
 function _populateChannelMembersList(selectedIds = []) {
@@ -5606,6 +6172,7 @@ function _populateChannelMembersList(selectedIds = []) {
 }
 
 async function openCreateChannel() {
+    if (!['admin','super_admin'].includes(S.user?.role)) return;
     _channelEditId = null;
     document.getElementById('channel-modal-title').textContent = 'Create Channel';
     document.getElementById('channel-modal-btn').textContent = 'Create Channel';
@@ -5827,23 +6394,24 @@ async function handleNotificationClick(notifId, threadId) {
 
     const isDm = threadId.startsWith('dm_');
 
-    // If we already have sidebar data, open the thread immediately
-    if (chatChannelData.length || chatDmData.length) {
-        const ch = chatChannelData.find(c => c.id === threadId);
-        if (ch) { openChatThread(ch.id, ch.name, false, ch.description || ''); loadChatChannels(); loadChatDms(); return; }
-        const dm = chatDmData.find(d => d.thread_id === threadId);
-        if (dm) { openChatThread(dm.thread_id, dm.user_name, true, ''); loadChatChannels(); loadChatDms(); return; }
-        // DM thread not found in cached list — open directly then refresh sidebar
-        if (isDm) { openChatThread(threadId, 'Direct Message', true, ''); loadChatChannels(); loadChatDms(); return; }
+    // Extract sender name from notification title as reliable fallback
+    // e.g. "DM from Kimz Moodley" → "Kimz Moodley"
+    let notifDmName = '';
+    if (isDm && notif && notif.title) {
+        const m = notif.title.match(/^DM from (.+)$/);
+        if (m) notifDmName = m[1].trim();
     }
 
-    // First time opening chat — load sidebar then open thread
+    // Reload sidebar so DM list is fresh and active state is correct
     await Promise.all([loadChatChannels(), loadChatDms()]);
+
     const ch = chatChannelData.find(c => c.id === threadId);
     if (ch) { openChatThread(ch.id, ch.name, false, ch.description || ''); return; }
+
     const dm = chatDmData.find(d => d.thread_id === threadId);
-    if (dm) { openChatThread(dm.thread_id, dm.user_name, true, ''); return; }
-    if (isDm) openChatThread(threadId, 'Direct Message', true, '');
+    // Use chatDmData name if available, else fall back to the notification title
+    const dmName = dm ? dm.user_name : (notifDmName || 'Direct Message');
+    if (isDm) { openChatThread(threadId, dmName, true, ''); return; }
 }
 
 async function markAllNotificationsRead() {
@@ -6098,20 +6666,56 @@ function newsColor(sourceId) {
 }
 
 async function loadNews(force = false) {
+    const LS_KEY = 'mnm_news_cache';
+
     if (force) {
         $('news-hero-wrap').innerHTML = '';
         $('news-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--g400)">Refreshing feed...</div>';
+        localStorage.removeItem(LS_KEY);
+    } else {
+        // Render from localStorage instantly — before the network call
+        try {
+            const lc = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+            if (lc && lc.articles && lc.articles.length) {
+                _newsData.articles = lc.articles;
+                const ageMin = Math.round((Date.now() - lc.savedAt) / 60000);
+                $('news-meta').textContent = `${lc.articles.length} articles · cached ${ageMin}m ago`;
+                renderSourceFilters();
+                filterNews();
+            }
+        } catch(e) {}
     }
+
     const r = await api('news-feed' + (force ? '?bust=1' : ''));
     if (!r.success) {
-        $('news-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--danger);">Failed to load news. The server may not be able to reach the RSS sources.</div>';
+        if (!_newsData.articles.length) {
+            $('news-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--danger);">Failed to load news. The server may not be able to reach the RSS sources.</div>';
+        }
         return;
     }
     _newsData.articles = r.articles || [];
     const ageMin = Math.round((r.age || 0) / 60);
-    $('news-meta').textContent = `${_newsData.articles.length} articles · ${r.cached ? `cached ${ageMin}m ago` : 'just refreshed'}`;
+    const staleNote = r.stale ? ' · refreshing...' : '';
+    $('news-meta').textContent = `${_newsData.articles.length} articles · ${r.cached ? `cached ${ageMin}m ago` : 'just refreshed'}${staleNote}`;
+    // Save to localStorage for next visit
+    try { localStorage.setItem(LS_KEY, JSON.stringify({articles: r.articles, savedAt: Date.now()})); } catch(e) {}
     renderSourceFilters();
     filterNews();
+    // If server returned stale data, kick off a silent background refresh
+    if (r.stale) {
+        setTimeout(async () => {
+            try {
+                const r2 = await api('news-feed?bust=1');
+                if (r2.success && r2.articles?.length) {
+                    _newsData.articles = r2.articles;
+                    $('news-meta').textContent = `${r2.articles.length} articles · just refreshed`;
+                    try { localStorage.setItem(LS_KEY, JSON.stringify({articles: r2.articles, savedAt: Date.now()})); } catch(e) {}
+                    renderSourceFilters();
+                    filterNews();
+                }
+            } catch(e) {}
+        }, 100);
+    }
 }
 
 function renderSourceFilters() {
@@ -6363,11 +6967,17 @@ async function saveNewsConfig() {
     const _origShowPage = window.showPage;
     window.showPage = function(p) { currentPage = p; if (_origShowPage) _origShowPage(p); };
 
+    // Ping immediately on login then every 60s
+    function doPing() {
+        if (!S.user) return;
+        api('activity-ping', 'POST', { page: currentPage }).catch(() => {});
+    }
+    document.addEventListener('app-logged-in', doPing);
     setInterval(() => {
         if (!S.user) return;
         const idleMs = Date.now() - lastActivity;
-        if (idleMs > 60000) return; // skip if idle > 60s
-        api('activity-ping', 'POST', { page: currentPage }).catch(() => {});
+        if (idleMs > 60000) return;
+        doPing();
     }, 60000);
 })();
 
@@ -6400,38 +7010,56 @@ function renderSopRecords(records) {
     const isAdmin = ['admin','super_admin'].includes(S.user?.role);
     if (!records.length) {
         el.innerHTML = isAdmin
-            ? `<div style="padding:60px;text-align:center;color:var(--g500);font-size:14px;">No SOPs yet — <button onclick="openSopModal()" class="btn btn-primary btn-sm" style="margin-left:6px;">+ Create your first SOP</button></div>`
-            : `<div style="padding:60px;text-align:center;color:var(--g500);font-size:14px;">No SOPs have been created yet.</div>`;
+            ? `<div style="padding:80px;text-align:center;color:var(--g500);font-size:14px;"><div style="font-size:36px;margin-bottom:12px;">📋</div><div style="font-weight:600;margin-bottom:6px;">No SOPs yet</div><p style="font-size:13px;margin-bottom:16px;">Create SOPs for your key customers to standardise your approach.</p><button onclick="openSopModal()" class="btn btn-primary">+ Create first SOP</button></div>`
+            : `<div style="padding:80px;text-align:center;color:var(--g500);font-size:14px;"><div style="font-size:36px;margin-bottom:12px;">📋</div><p>No SOPs have been created yet.</p></div>`;
         return;
     }
-    // Build a summary: show first 3 non-system fields
-    const summaryFields = _sopFieldConfig.filter(f => f.id !== 'sop_f1').slice(0, 3);
-    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;">` + records.map(r => {
+    // Fields to show in card body (skip customer_name which is the title)
+    const bodyFields = _sopFieldConfig.filter(f => fieldKey(f.label) !== 'customer_name').slice(0, 4);
+    // Try to find a trade lanes or route field to render as chips
+    const tradeKey = _sopFieldConfig.find(f => /trade.lane|route|lane/i.test(f.label));
+    const serviceKey = _sopFieldConfig.find(f => /service|product/i.test(f.label));
+
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">` + records.map(r => {
         const customerName = r['customer_name'] || 'Unnamed Customer';
+        const initials = customerName.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+        const isActive = (r.status || 'active') === 'active';
         const updated = r.updated_at ? new Date(r.updated_at).toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'}) : '';
-        const statusColor = r.status === 'active' ? 'var(--success)' : 'var(--g400)';
-        const details = summaryFields.map(f => {
+        const clickFn = isAdmin ? `openSopModal('${r.id}')` : `viewSopRecord('${r.id}')`;
+
+        // Chip fields (trade lanes / services)
+        const tradeVal = tradeKey ? (r[fieldKey(tradeKey.label)] || '') : '';
+        const chips = (Array.isArray(tradeVal) ? tradeVal : (tradeVal ? [tradeVal] : []))
+            .slice(0,3).map(v => `<span class="sop-chip">${esc(v)}</span>`).join('');
+
+        // Regular detail rows
+        const details = bodyFields.map(f => {
             const val = r[fieldKey(f.label)];
             if (!val || (Array.isArray(val) && !val.length)) return '';
             const display = Array.isArray(val) ? val.join(', ') : val;
-            return `<div style="display:flex;gap:6px;font-size:12px;margin-top:5px;">
-                <span style="color:var(--g400);min-width:90px;flex-shrink:0;">${f.label.split('/')[0].trim()}:</span>
-                <span style="color:var(--g700);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${display}</span>
+            if (display === tradeVal) return ''; // skip if already shown as chips
+            return `<div class="sop-kb-field">
+                <span class="sop-kb-field-label">${f.label.split('/')[0].trim()}</span>
+                <span class="sop-kb-field-val" title="${esc(display)}">${esc(display)}</span>
             </div>`;
         }).filter(Boolean).join('');
-        const clickFn = isAdmin ? `openSopModal('${r.id}')` : `viewSopRecord('${r.id}')`;
-        return `<div class="card" onclick="${clickFn}" style="cursor:pointer;transition:box-shadow 0.15s;border:1px solid var(--border);" onmouseenter="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.09)'" onmouseleave="this.style.boxShadow=''">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:${details?'10px':'0'};">
-                <div>
-                    <div style="font-size:15px;font-weight:700;color:var(--g900);margin-bottom:3px;">${customerName}</div>
-                    <span style="font-size:10px;padding:2px 8px;border-radius:var(--radius-pill);background:${statusColor}18;color:${statusColor};font-weight:600;text-transform:uppercase;letter-spacing:.4px;">${r.status||'active'}</span>
+
+        return `<div class="sop-kb-card" onclick="${clickFn}">
+            <div class="sop-kb-card-top">
+                <div class="sop-kb-card-head">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:38px;height:38px;border-radius:10px;background:var(--mm-blue-10);color:var(--mm-blue);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${initials}</div>
+                        <div class="sop-kb-name">${esc(customerName)}</div>
+                    </div>
+                    <span class="sop-kb-badge ${isActive?'active':'inactive'}">${isActive?'Active':'Inactive'}</span>
                 </div>
-                <div style="text-align:right;flex-shrink:0;">
-                    <div style="font-size:11px;color:var(--g400);">${updated}</div>
-                    <div style="font-size:11px;color:var(--g400);margin-top:1px;">${r.created_by_name||''}</div>
-                </div>
+                ${chips ? `<div style="margin-top:4px;">${chips}</div>` : ''}
             </div>
-            ${details ? `<div style="border-top:1px solid var(--g100);padding-top:10px;">${details}</div>` : ''}
+            ${details ? `<div class="sop-kb-fields">${details}</div>` : ''}
+            <div class="sop-kb-footer">
+                <span>Updated ${updated}</span>
+                <span>${esc(r.created_by_name || '')}</span>
+            </div>
         </div>`;
     }).join('') + `</div>`;
 }
@@ -6440,18 +7068,32 @@ function viewSopRecord(id) {
     const r = _sopRecords.find(x => x.id === id);
     if (!r) return;
     const customerName = r['customer_name'] || 'SOP';
-    let html = `<div style="padding:4px 0;">`;
+    const isActive = (r.status || 'active') === 'active';
+    let html = `<div style="padding:4px 0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--g100);">
+            <div style="width:44px;height:44px;border-radius:10px;background:var(--mm-blue-10);color:var(--mm-blue);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;">
+                ${customerName.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()}
+            </div>
+            <div>
+                <div style="font-size:16px;font-weight:700;color:var(--g900);">${esc(customerName)}</div>
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:var(--radius-pill);background:${isActive?'#d1fae5':'var(--g100)'};color:${isActive?'#065f46':'var(--g500)'};">${isActive?'Active':'Inactive'}</span>
+            </div>
+        </div>`;
     _sopFieldConfig.forEach(f => {
         const key = fieldKey(f.label);
         const val = r[key] || r[f.label] || '';
         if (!val || (Array.isArray(val) && !val.length)) return;
+        const isChips = Array.isArray(val) && val.length > 1;
         html += `<div style="margin-bottom:14px;">
-            <div style="font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;margin-bottom:4px;">${f.label}</div>
-            <div style="font-size:13px;color:var(--text-primary);">${Array.isArray(val) ? val.join(', ') : val}</div>
+            <div style="font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">${esc(f.label)}</div>
+            ${isChips
+                ? `<div>${val.map(v=>`<span class="sop-chip">${esc(v)}</span>`).join('')}</div>`
+                : `<div style="font-size:13px;color:var(--g800);line-height:1.5;">${esc(Array.isArray(val)?val.join(', '):val)}</div>`
+            }
         </div>`;
     });
     html += `</div>`;
-    openConfirm(`<strong>${customerName}</strong><br><br>${html}`, null, null, 'Close', null);
+    openConfirm({title: 'Customer SOP', body: html, okText: 'Close', danger: false, hideCancel: true, onConfirm: () => {}});
 }
 
 function fieldKey(label) {
@@ -6462,7 +7104,7 @@ async function openSopModal(id = null) {
     _sopEditId = id;
     const r = id ? _sopRecords.find(x => x.id === id) : null;
     $('sop-modal-title').textContent = id ? 'Edit Customer SOP' : 'New Customer SOP';
-    $('sop-delete-btn').style.display = (id && S.user?.role === 'super_admin') ? '' : 'none';
+    $('sop-delete-btn').style.display = (id && ['admin','super_admin'].includes(S.user?.role)) ? '' : 'none';
     $('sop-form-fields').innerHTML = '<div style="padding:20px;text-align:center;color:var(--g400);font-size:13px;">Loading fields...</div>';
     openModal('m-sop');
 
@@ -6543,10 +7185,16 @@ async function deleteSopRecord() {
     if (!_sopEditId) return;
     const r = _sopRecords.find(x => x.id === _sopEditId);
     const name = r?.customer_name || 'this SOP';
-    openConfirm(`Delete SOP for <strong>${name}</strong>? This cannot be undone.`, async () => {
-        const res = await api('sop-records', 'DELETE', {id: _sopEditId});
-        if (res.success) { toast('SOP deleted', 'success'); closeSopModal(); await loadSopRecords(); }
-        else toast(res.error || 'Failed', 'error');
+    openConfirm({
+        title: 'Delete SOP',
+        body: `Delete SOP for <strong>${name}</strong>? This cannot be undone.`,
+        okText: 'Delete',
+        danger: true,
+        onConfirm: async () => {
+            const res = await api('sop-records', 'DELETE', {id: _sopEditId});
+            if (res.success) { toast('SOP deleted', 'success'); closeSopModal(); await loadSopRecords(); }
+            else toast(res.error || 'Failed', 'error');
+        }
     });
 }
 
@@ -6670,8 +7318,8 @@ async function saveSopFieldConfig() {
     toast(r.success ? 'SOP field configuration saved' : 'Failed to save', r.success ? 'success' : 'error');
 }
 
-// Poll notifications every 5s, chat unread badge every 15s
-setInterval(() => { if (S.user) pollNotifications(); }, 5000);
+// Poll notifications every 3s, chat unread badge every 15s
+setInterval(() => { if (S.user) pollNotifications(); }, 3000);
 setInterval(() => { if (S.user) updateChatUnreadBadge(); }, 15000);
 
 checkSession();
