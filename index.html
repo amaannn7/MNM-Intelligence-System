@@ -2596,10 +2596,11 @@ async function renderDashboardSuperAdmin(st) {
         pageBody.appendChild(perfCard);
     }
 
-    // ── Row 3: Pipeline + Focus Queue + Recent Activity side by side ─────────
+    // ── Row 3: Pipeline + Focus Queue side by side (same proportions as the
+    // standard dash-grid every other role uses) ──────────────────────────────
     const row3 = document.createElement('div');
-    row3.className = 'exec-injected';
-    row3.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 340px;gap:16px;margin-top:16px;';
+    row3.className = 'exec-injected dash-grid';
+    row3.style.cssText = 'margin-top:16px;';
 
     const pipeCard = document.createElement('div');
     pipeCard.className = 'card';
@@ -2610,15 +2611,16 @@ async function renderDashboardSuperAdmin(st) {
     focusCard.style.cssText = 'overflow-y:auto;max-height:480px;';
     focusCard.innerHTML = `<div class="card-head" style="position:sticky;top:0;background:white;z-index:1;padding-bottom:10px;border-bottom:1px solid var(--g100);"><h3>Focus Queue</h3></div><div id="exec-focus"></div>`;
 
-    const actCard = document.createElement('div');
-    actCard.className = 'card';
-    actCard.style.cssText = 'overflow-y:auto;max-height:480px;';
-    actCard.innerHTML = `<div class="card-head" style="position:sticky;top:0;background:white;z-index:1;"><h3>Recent Activity</h3><a href="#" onclick="showPage('activity');return false;" style="font-size:12px;color:var(--mm-blue);font-weight:600;">View all →</a></div><div style="font-size:12px;">${renderActivityFeed(logs, 10)}</div>`;
-
     row3.appendChild(pipeCard);
     row3.appendChild(focusCard);
-    row3.appendChild(actCard);
     pageBody.appendChild(row3);
+
+    // ── Row 4: Recent Activity (full width) ───────────────────────────────
+    const actCard = document.createElement('div');
+    actCard.className = 'card exec-injected';
+    actCard.style.cssText = 'margin-top:16px;overflow-y:auto;max-height:480px;';
+    actCard.innerHTML = `<div class="card-head" style="position:sticky;top:0;background:white;z-index:1;"><h3>Recent Activity</h3><a href="#" onclick="showPage('activity');return false;" style="font-size:12px;color:var(--mm-blue);font-weight:600;">View all →</a></div><div style="font-size:12px;">${renderActivityFeed(logs, 10)}</div>`;
+    pageBody.appendChild(actCard);
 
     if (origPipeline) $('exec-pipeline').innerHTML = origPipeline.innerHTML;
     const origFocus = $('dash-focus');
