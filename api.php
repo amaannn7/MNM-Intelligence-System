@@ -164,7 +164,23 @@ function normalizeLead(array $lead): array {
     $lead['call_logs'] = $lead['call_logs'] ?? [];
     $lead['email_history'] = $lead['email_history'] ?? [];
     $lead['requisites'] = $lead['requisites'] ?? [];
-    $lead['stage_notes'] = is_array($lead['stage_notes'] ?? null) ? $lead['stage_notes'] : [];
+    $lead['notes_history'] = is_array($lead['notes_history'] ?? null) ? $lead['notes_history'] : [];
+    // One-time migration: the old per-stage notes feature stored notes
+    // keyed by stage in stage_notes; folded into the new running history
+    // (each stage's note becomes one dated entry) so nothing already
+    // written by a rep is lost when this field is retired.
+    if (!empty($lead['stage_notes']) && is_array($lead['stage_notes'])) {
+        foreach ($lead['stage_notes'] as $stage => $text) {
+            if (trim((string)$text) === '') continue;
+            $lead['notes_history'][] = [
+                'id' => 'note_migrated_' . substr(md5($lead['id'] . $stage), 0, 10),
+                'text' => $text . " (migrated from \"" . ($stage) . "\" stage notes)",
+                'author' => 'System',
+                'created_at' => $lead['updated_at'] ?? date('c'),
+            ];
+        }
+        unset($lead['stage_notes']);
+    }
     $lead['archived_at'] = $lead['archived_at'] ?? '';
     $lead['archived_by'] = $lead['archived_by'] ?? '';
     $lead['archive_reason'] = $lead['archive_reason'] ?? '';
@@ -476,7 +492,7 @@ function hasPermission(string $role, string $action): bool {
         'reassign_lead'         => ['admin', 'super_admin'],
         'manage_users'          => ['admin', 'super_admin'],
         'delete_user'           => ['super_admin'],
-        'view_audit_log'        => ['super_admin'],
+        'view_audit_log'        => ['admin', 'super_admin'],
         'manage_admin_settings' => ['admin', 'super_admin'],
         'manage_global_settings'=> ['super_admin'],
         'export_leads'          => ['admin', 'super_admin'],
@@ -484,6 +500,65 @@ function hasPermission(string $role, string $action): bool {
         'view_super_dashboard'  => ['super_admin'],
     ];
     return in_array($role, $matrix[$action] ?? [], true);
+}
+
+// Role-based visibility hierarchy (not a per-manager reporting line — just
+// three flat tiers): super_admin sees everyone; admin sees their own leads
+// plus every sales_rep's leads, but NOT super_admin-owned leads; sales_rep
+// sees only their own. Applied everywhere leads are filtered by ownership
+// (list, stats, exports, chat #client refs) so visibility is consistent.
+function visibleLeadsFor(array $user, array $allLeads): array {
+    $role = normalizeRole($user['role'] ?? 'sales_rep');
+    if ($role === 'super_admin') return $allLeads;
+    if ($role === 'sales_rep') {
+        return array_values(array_filter($allLeads, fn($l) => ($l['owner_id'] ?? '') === $user['id']));
+    }
+    // admin
+    static $ownerRoles = null;
+    if ($ownerRoles === null) {
+        $ownerRoles = [];
+        foreach (getUsers() as $u) $ownerRoles[$u['id']] = normalizeRole($u['role'] ?? 'sales_rep');
+    }
+    return array_values(array_filter($allLeads, function($l) use ($user, $ownerRoles) {
+        $ownerId = $l['owner_id'] ?? '';
+        if ($ownerId === $user['id']) return true;
+        return ($ownerRoles[$ownerId] ?? 'sales_rep') !== 'super_admin';
+    }));
+}
+
+// Can $user open/act on a specific lead, per the same hierarchy? Used for
+// single-lead reads (GET lead, chat #client-ref) where fetching the whole
+// visible set first would be wasteful.
+function canViewLead(array $user, array $lead): bool {
+    $role = normalizeRole($user['role'] ?? 'sales_rep');
+    if ($role === 'super_admin') return true;
+    $ownerId = $lead['owner_id'] ?? '';
+    if ($ownerId === $user['id']) return true;
+    if ($role === 'sales_rep') return false;
+    // admin: visible unless the owner is a super_admin
+    foreach (getUsers() as $u) {
+        if ($u['id'] === $ownerId) return normalizeRole($u['role'] ?? 'sales_rep') !== 'super_admin';
+    }
+    return true; // owner not found (e.g. unassigned) — don't hide from admin
+}
+
+// Same hierarchy, for meetings (keyed by user_id instead of owner_id).
+function visibleMeetingsFor(array $user, array $allMeetings): array {
+    $role = normalizeRole($user['role'] ?? 'sales_rep');
+    if ($role === 'super_admin') return $allMeetings;
+    if ($role === 'sales_rep') {
+        return array_values(array_filter($allMeetings, fn($m) => ($m['user_id'] ?? '') === $user['id']));
+    }
+    static $ownerRoles = null;
+    if ($ownerRoles === null) {
+        $ownerRoles = [];
+        foreach (getUsers() as $u) $ownerRoles[$u['id']] = normalizeRole($u['role'] ?? 'sales_rep');
+    }
+    return array_values(array_filter($allMeetings, function($m) use ($user, $ownerRoles) {
+        $uid = $m['user_id'] ?? '';
+        if ($uid === $user['id']) return true;
+        return ($ownerRoles[$uid] ?? 'sales_rep') !== 'super_admin';
+    }));
 }
 
 // ===== AUDIT LOGGING =====
@@ -1243,6 +1318,27 @@ function getDmThreadId(string $userId1, string $userId2): string {
     $ids = [$userId1, $userId2]; sort($ids);
     return 'dm_' . md5($ids[0] . '_' . $ids[1]);
 }
+
+// A DM thread id is a deterministic hash of two user ids, so it's guessable
+// by anyone who can learn both ids. Every endpoint that reads/writes a
+// thread (messages, uploads, delete, pin) must call this first — without it,
+// any authenticated user can access any other pair's private DM by
+// recomputing the hash, or any private channel by its known id.
+function canAccessThread(array $user, string $threadId): bool {
+    if (str_starts_with($threadId, 'dm_')) {
+        foreach (getUsers() as $u) {
+            if (($u['id'] ?? '') === $user['id']) continue;
+            if (getDmThreadId($user['id'], $u['id']) === $threadId) return true;
+        }
+        return false;
+    }
+    foreach (getChatChannels() as $ch) {
+        if ($ch['id'] !== $threadId) continue;
+        $members = $ch['members'] ?? [];
+        return empty($members) || isChatAdmin($user) || in_array($user['id'], $members, true);
+    }
+    return false; // unknown channel id
+}
 function getChatUnreadCounts(string $userId): array {
     $counts = [];
     foreach (getChatChannels() as $ch) {
@@ -1522,8 +1618,8 @@ switch ($action) {
         $meetings = getMeetings();
         foreach ($meetings as &$m) {
             if ($m['id'] === $input['meeting_id']) {
-                if (($m['user_id'] ?? '') !== $user['id'] && !hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-                    respond(['success' => false, 'error' => 'Insufficient permissions'], 403);
+                if (empty(visibleMeetingsFor($user, [$m]))) {
+                    respond(['success' => false, 'error' => 'Access denied'], 403);
                 }
                 $graph = msCreateCalendarEvent($user, $m);
                 if ($graph['success']) {
@@ -1555,10 +1651,9 @@ switch ($action) {
         if (!$includeArchived) {
             $leads = array_values(array_filter($leads, fn($l) => !isArchived($l)));
         }
-        // Filter by ownership for non-privileged roles
-        if (!hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-            $leads = array_values(array_filter($leads, fn($l) => $l['owner_id'] === $user['id']));
-        }
+        // Role hierarchy: super_admin sees all; admin sees own + all
+        // sales_rep leads (not super_admin's); sales_rep sees only own.
+        $leads = visibleLeadsFor($user, $leads);
         // Filter by owner_id for admin/superadmin drilling into a rep
         if (!empty($_GET['owner_id']) && hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
             $leads = array_values(array_filter($leads, fn($l) => $l['owner_id'] === $_GET['owner_id']));
@@ -1566,6 +1661,8 @@ switch ($action) {
         // "My Leads" vs "Team Leads" split for admin/super_admin — lets them
         // separate their own owned leads from the reps' leads below them,
         // since view_all_leads otherwise returns everyone's leads mixed together.
+        // $leads is already hierarchy-filtered above, so "team" here naturally
+        // excludes super_admin's leads for an admin viewer too.
         if (hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads') && !empty($_GET['scope'])) {
             if ($_GET['scope'] === 'mine') {
                 $leads = array_values(array_filter($leads, fn($l) => $l['owner_id'] === $user['id']));
@@ -1614,8 +1711,8 @@ switch ($action) {
             $leads = getLeads();
             foreach ($leads as $l) {
                 if ($l['id'] === $id) {
-                    if (($l['owner_id'] ?? '') !== ($user['id'] ?? '') && !hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-                        respond(['success' => false, 'error' => 'Insufficient permissions'], 403);
+                    if (!canViewLead($user, $l)) {
+                        respond(['success' => false, 'error' => 'Access denied'], 403);
                     }
                     respond(['success' => true, 'lead' => $l]);
                 }
@@ -1721,8 +1818,8 @@ switch ($action) {
             $leads = getLeads();
             foreach ($leads as &$l) {
                 if ($l['id'] === $id) {
-                    if (($l['owner_id'] ?? '') !== ($user['id'] ?? '') && !hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-                        respond(['success' => false, 'error' => 'Insufficient permissions'], 403);
+                    if (!canViewLead($user, $l)) {
+                        respond(['success' => false, 'error' => 'Access denied'], 403);
                     }
                     // Reassignment guard
                     if (isset($input['owner_id']) && $input['owner_id'] !== $l['owner_id']) {
@@ -1763,7 +1860,7 @@ switch ($action) {
                             logActivity($user, 'lead.restored', ['lead_id' => $id]);
                         }
                     }
-                    $allowed = ['first_name','last_name','email','phone','company','title','industry','country','website','linkedin','notes','stage_notes','status','followup_date','lost_reason','sop_progress','call_logs','requisites','freight_profile','deal_score','ai_recommendation','won_details','owner_id','owner_name','next_action_type','next_action_due','next_action_note','stage_entered_at','proposal_value','proposal_sent_at','nurture_until','source'];
+                    $allowed = ['first_name','last_name','email','phone','company','title','industry','country','website','linkedin','notes','notes_history','status','followup_date','lost_reason','sop_progress','call_logs','requisites','freight_profile','deal_score','ai_recommendation','won_details','owner_id','owner_name','next_action_type','next_action_due','next_action_note','stage_entered_at','proposal_value','proposal_sent_at','nurture_until','source'];
                     $changed = [];
                     foreach ($allowed as $f) {
                         if (isset($input[$f])) { $l[$f] = $input[$f]; $changed[] = $f; }
@@ -1861,6 +1958,7 @@ switch ($action) {
             if ($l['id'] === $leadId) { $targetLead = &$l; break; }
         }
         if (!$targetLead) respond(['success' => false, 'error' => 'Lead not found'], 404);
+        if (!canViewLead($user, $targetLead)) respond(['success' => false, 'error' => 'Access denied'], 403);
 
         $prompt = buildResearchPrompt($targetLead);
         $res = callLLM($provider, $apiKey, $prompt);
@@ -1906,6 +2004,7 @@ switch ($action) {
         $lead = null;
         foreach ($leads as $l) { if ($l['id'] === $leadId) { $lead = $l; break; } }
         if (!$lead) respond(['success' => false, 'error' => 'Lead not found'], 404);
+        if (!canViewLead($user, $lead)) respond(['success' => false, 'error' => 'Access denied'], 403);
 
         $settings = [
             'sender_name' => $user['name'],
@@ -1934,6 +2033,7 @@ switch ($action) {
         $leads = getLeads();
         foreach ($leads as &$l) {
             if ($l['id'] === $leadId) {
+                if (!canViewLead($user, $l)) respond(['success' => false, 'error' => 'Access denied'], 403);
                 $l['email_history'][] = ['type' => $emailType, 'subject' => $subject, 'content' => $body, 'sent_at' => date('c'), 'sent_by' => $user['name']];
                 $l['emails_sent'] = ($l['emails_sent'] ?? 0) + 1;
                 $l['last_email_type'] = $emailType;
@@ -1968,6 +2068,7 @@ switch ($action) {
         $lead = null;
         foreach ($leads as $l) { if ($l['id'] === $leadId) { $lead = $l; break; } }
         if (!$lead) respond(['success' => false, 'error' => 'Lead not found'], 404);
+        if (!canViewLead($user, $lead)) respond(['success' => false, 'error' => 'Access denied'], 403);
 
         $settings = [
             'sender_name' => $user['name'],
@@ -1988,9 +2089,7 @@ switch ($action) {
         if (!$includeArchived) {
             $meetings = array_values(array_filter($meetings, fn($m) => !isArchived($m)));
         }
-        if (!hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-            $meetings = array_values(array_filter($meetings, fn($m) => $m['user_id'] === $user['id']));
-        }
+        $meetings = visibleMeetingsFor($user, $meetings);
         usort($meetings, fn($a, $b) => strcmp($a['start_time'] ?? '', $b['start_time'] ?? ''));
         respond(['success' => true, 'meetings' => $meetings]);
         break;
@@ -2002,6 +2101,11 @@ switch ($action) {
             if (empty($draft['start_time'])) respond(['success' => false, 'error' => 'Meeting date and time required'], 400);
             if (empty($draft['attendees'])) respond(['success' => false, 'error' => 'At least one valid attendee email is required'], 400);
             if (empty($draft['notes'])) respond(['success' => false, 'error' => 'Meeting agenda or notes required'], 400);
+            if ($draft['lead_id']) {
+                $linkedLead = null;
+                foreach (getLeads() as $l) { if ($l['id'] === $draft['lead_id']) { $linkedLead = $l; break; } }
+                if ($linkedLead && !canViewLead($user, $linkedLead)) respond(['success' => false, 'error' => 'Access denied'], 403);
+            }
             $meeting = array_merge($draft, [
                 'id' => generateId('mtg_'),
                 'calendar_event_id' => '',
@@ -2080,8 +2184,8 @@ switch ($action) {
             $meetings = getMeetings();
             foreach ($meetings as &$m) {
                 if ($m['id'] === $id) {
-                    if (($m['user_id'] ?? '') !== ($user['id'] ?? '') && !hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-                        respond(['success' => false, 'error' => 'Insufficient permissions'], 403);
+                    if (empty(visibleMeetingsFor($user, [$m]))) {
+                        respond(['success' => false, 'error' => 'Access denied'], 403);
                     }
                     foreach (['status','outcome','outcome_notes','title','start_time','end_time','start_time_local','end_time_local','location','location_type','teams_link','teams_join_url','calendar_event_id','calendar_web_link','calendar_sync_status','calendar_sync_error','invite_sent_at','notes','attendees','client_email'] as $f) {
                         if (isset($input[$f])) $m[$f] = $input[$f];
@@ -2168,6 +2272,7 @@ switch ($action) {
         $leads = getLeads();
         foreach ($leads as &$l) {
             if ($l['id'] === $leadId) {
+                if (!canViewLead($user, $l)) respond(['success' => false, 'error' => 'Access denied'], 403);
                 if (!isset($l['call_logs'])) $l['call_logs'] = [];
                 if (!isset($l['requisites'])) $l['requisites'] = [];
 
@@ -2224,6 +2329,7 @@ switch ($action) {
             if ($l['id'] === $leadId) { $lead = &$l; break; }
         }
         if (!$lead) respond(['success' => false, 'error' => 'Lead not found'], 404);
+        if (!canViewLead($user, $lead)) respond(['success' => false, 'error' => 'Access denied'], 403);
 
         $name = trim(($lead['first_name'] ?? '') . ' ' . ($lead['last_name'] ?? ''));
         $rData = !empty($lead['enrichment']) ? 'Available' : 'None';
@@ -2446,9 +2552,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $user = requireAuth();
         $allLeads = getLeads();
         $allLeads = array_values(array_filter($allLeads, fn($l) => !isArchived($l)));
-        $leads = !hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')
-            ? array_values(array_filter($allLeads, fn($l) => $l['owner_id'] === $user['id']))
-            : array_values($allLeads);
+        $leads = visibleLeadsFor($user, $allLeads);
 
         $byStatus = [];
         foreach ($leads as $l) {
@@ -2459,9 +2563,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $totalEmails = array_sum(array_column($leads, 'emails_sent'));
         $meetings = getMeetings();
         $meetings = array_values(array_filter($meetings, fn($m) => !isArchived($m)));
-        if (!hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-            $meetings = array_filter($meetings, fn($m) => $m['user_id'] === $user['id']);
-        }
+        $meetings = visibleMeetingsFor($user, $meetings);
 
         // Follow-ups due
         $today = date('Y-m-d');
@@ -2525,7 +2627,10 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
             $userMap = [];
             foreach ($users as $u) $userMap[$u['id']] = $u['name'];
             $byOwner = [];
-            foreach ($allLeads as $l) {
+            // $leads (not $allLeads) — team-performance rows must respect the
+            // same hierarchy as everything else: an admin viewing this table
+            // shouldn't see a row for super_admin's own leads.
+            foreach ($leads as $l) {
                 $oid = $l['owner_id'] ?? 'unknown';
                 if (!isset($byOwner[$oid])) $byOwner[$oid] = ['owner_id' => $oid, 'name' => $userMap[$oid] ?? 'Unknown', 'total' => 0, 'won' => 0, 'lost' => 0, 'emails' => 0, 'overdue' => 0, 'stale' => 0, 'no_next_action' => 0, 'meetings' => 0, 'proposals' => 0];
                 $byOwner[$oid]['total']++;
@@ -2541,12 +2646,12 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
                 $oid = $m['user_id'] ?? 'unknown';
                 if (isset($byOwner[$oid])) $byOwner[$oid]['meetings']++;
             }
-            $overdueAll = array_values(array_filter($allLeads, fn($l) =>
+            $overdueAll = array_values(array_filter($leads, fn($l) =>
                 !empty($l['next_action_due']) && $l['next_action_due'] <= $today && isActiveLead($l)
             ));
             $teamTargets = [];
             foreach (array_keys($byOwner) as $ownerId) {
-                $teamTargets[$ownerId] = targetProgressForUser($ownerId, $allLeads, $meetingsArr, $visibleTargets);
+                $teamTargets[$ownerId] = targetProgressForUser($ownerId, $leads, $meetingsArr, $visibleTargets);
             }
             $statsPayload['by_owner']    = array_map(function($row) use ($teamTargets) {
                 $row['target_progress'] = $teamTargets[$row['owner_id']] ?? [];
@@ -2564,7 +2669,14 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
     case 'targets':
         $user = requireAuth();
         if (hasPermission($user['role'] ?? 'sales_rep', 'view_team_stats')) {
-            $targetUsers = array_values(array_filter(getUsers(), fn($u) => ($u['is_active'] ?? true) && !isArchived($u)));
+            $activeUsers = array_values(array_filter(getUsers(), fn($u) => ($u['is_active'] ?? true) && !isArchived($u)));
+            // Same hierarchy as leads/meetings — an admin managing targets
+            // for "their team" shouldn't see (or be able to set) a target
+            // for super_admin.
+            $viewerRole = normalizeRole($user['role'] ?? 'sales_rep');
+            $targetUsers = $viewerRole === 'super_admin'
+                ? $activeUsers
+                : array_values(array_filter($activeUsers, fn($u) => $u['id'] === $user['id'] || normalizeRole($u['role'] ?? 'sales_rep') !== 'super_admin'));
         } else {
             $targetUsers = [$user];
         }
@@ -2595,9 +2707,17 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         if (!array_key_exists('target_value', $input)) {
             respond(['success' => false, 'error' => 'Missing required fields: target_value'], 400);
         }
-        $userIds = array_map(fn($u) => $u['id'], getUsers());
-        if (!in_array($input['user_id'], $userIds, true)) {
+        $targetUser = null;
+        foreach (getUsers() as $u) { if ($u['id'] === $input['user_id']) { $targetUser = $u; break; } }
+        if (!$targetUser) {
             respond(['success' => false, 'error' => 'Target user not found'], 404);
+        }
+        // An admin can set targets for themselves and sales_reps, but not
+        // for super_admin — same hierarchy as leads/meetings visibility.
+        if (normalizeRole($adminUser['role'] ?? 'sales_rep') !== 'super_admin'
+            && $targetUser['id'] !== $adminUser['id']
+            && normalizeRole($targetUser['role'] ?? 'sales_rep') === 'super_admin') {
+            respond(['success' => false, 'error' => 'Access denied'], 403);
         }
         $target = upsertTarget($input['user_id'], $input['metric'], $input['target_value'], $adminUser);
         logActivity($adminUser, 'target.saved', ['user_id' => $input['user_id'], 'metric' => $input['metric']]);
@@ -2649,12 +2769,45 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         }
         break;
 
+    // Read-only, any authenticated user (not just admin) — every rep needs
+    // the configured custom requisite fields to log calls correctly, but
+    // admin-settings itself is admin-only since it also returns API keys
+    // and other sensitive config a rep shouldn't see.
+    case 'requisite-fields':
+        requireAuth();
+        $admin = getAdmin();
+        respond(['success' => true, 'requisite_fields' => $admin['requisite_fields'] ?? []]);
+        break;
+
+    // Any authenticated user — a bare id/name/company index of every lead in
+    // the system (no contact details, no deal data), used only so #client
+    // chat tags can be highlighted/clickable for a name outside the viewer's
+    // own visibility tier. The actual lead GET still enforces canViewLead()
+    // when clicked, so this never leaks more than "a client by this name
+    // exists" — same as anyone could infer from seeing the tag in a message.
+    case 'client-name-index':
+        requireAuth();
+        $leads = array_values(array_filter(getLeads(), fn($l) => !isArchived($l)));
+        $index = array_map(fn($l) => [
+            'id' => $l['id'],
+            'first_name' => $l['first_name'] ?? '',
+            'last_name' => $l['last_name'] ?? '',
+            'company' => $l['company'] ?? '',
+        ], $leads);
+        respond(['success' => true, 'leads' => $index]);
+        break;
+
     // ===== USER MANAGEMENT =====
     case 'users':
         $user = requireAdmin();
         $users = getUsers();
         $includeArchived = !empty($_GET['include_archived']);
         if (!$includeArchived) $users = array_values(array_filter($users, fn($u) => !isArchived($u)));
+        // Same hierarchy as leads/meetings/targets — an admin's Users list
+        // shows themselves + sales_reps, not super_admin accounts.
+        if (normalizeRole($user['role'] ?? 'sales_rep') !== 'super_admin') {
+            $users = array_values(array_filter($users, fn($u) => $u['id'] === $user['id'] || normalizeRole($u['role'] ?? 'sales_rep') !== 'super_admin'));
+        }
         $safe = array_map(fn($u) => [
             'id' => $u['id'], 'name' => $u['name'], 'username' => $u['username'] ?? '', 'email' => $u['email'],
             'role' => normalizeRole($u['role'] ?? 'sales_rep'), 'title' => $u['title'] ?? '', 'office' => $u['office'] ?? '',
@@ -2713,6 +2866,14 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         }
         foreach ($users as &$u) {
             if ($u['id'] === $id) {
+                // An admin (not super_admin) cannot edit/archive/reset the
+                // password of a super_admin account — same hierarchy as
+                // leads/meetings/targets. Editing your own account is fine.
+                if ($u['id'] !== $adminUser['id']
+                    && normalizeRole($adminUser['role'] ?? 'sales_rep') !== 'super_admin'
+                    && normalizeRole($u['role'] ?? 'sales_rep') === 'super_admin') {
+                    respond(['success' => false, 'error' => 'Access denied'], 403);
+                }
                 foreach (['name','username','email','title','office','is_active'] as $f) {
                     if (isset($input[$f])) $u[$f] = $input[$f];
                 }
@@ -2773,11 +2934,27 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $page   = max(1, intval($_GET['page'] ?? 1));
         $limit  = min(100, intval($_GET['limit'] ?? 50));
         $offset = ($page - 1) * $limit;
-        $total  = (int) db()->query("SELECT COUNT(*) FROM audit_log")->fetchColumn();
-        $rows   = db()->prepare("SELECT data FROM audit_log ORDER BY updated_at DESC LIMIT :lim OFFSET :off");
-        $rows->bindValue(':lim', $limit, PDO::PARAM_INT);
-        $rows->bindValue(':off', $offset, PDO::PARAM_INT);
-        $rows->execute();
+        // Same hierarchy as leads/meetings/targets/users — an admin sees
+        // their own activity + their sales_reps', never super_admin's.
+        $viewerRole = normalizeRole($user['role'] ?? 'sales_rep');
+        if ($viewerRole === 'super_admin') {
+            $total = (int) db()->query("SELECT COUNT(*) FROM audit_log")->fetchColumn();
+            $rows  = db()->prepare("SELECT data FROM audit_log ORDER BY updated_at DESC LIMIT :lim OFFSET :off");
+            $rows->bindValue(':lim', $limit, PDO::PARAM_INT);
+            $rows->bindValue(':off', $offset, PDO::PARAM_INT);
+            $rows->execute();
+        } else {
+            $visibleIds = array_values(array_map(fn($u) => $u['id'], array_filter(getUsers(),
+                fn($u) => $u['id'] === $user['id'] || normalizeRole($u['role'] ?? 'sales_rep') !== 'super_admin')));
+            $totalStmt = db()->prepare("SELECT COUNT(*) FROM audit_log WHERE data->>'user_id' = ANY(:ids)");
+            $totalStmt->execute([':ids' => '{' . implode(',', array_map(fn($id) => '"' . str_replace('"','\\"',$id) . '"', $visibleIds)) . '}']);
+            $total = (int) $totalStmt->fetchColumn();
+            $rows  = db()->prepare("SELECT data FROM audit_log WHERE data->>'user_id' = ANY(:ids) ORDER BY updated_at DESC LIMIT :lim OFFSET :off");
+            $rows->bindValue(':ids', '{' . implode(',', array_map(fn($id) => '"' . str_replace('"','\\"',$id) . '"', $visibleIds)) . '}');
+            $rows->bindValue(':lim', $limit, PDO::PARAM_INT);
+            $rows->bindValue(':off', $offset, PDO::PARAM_INT);
+            $rows->execute();
+        }
         $logs = array_map(fn($r) => json_decode($r['data'], true), $rows->fetchAll());
         respond([
             'success' => true,
@@ -2794,9 +2971,11 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         if (!hasPermission($user['role'] ?? 'sales_rep', 'reassign_lead')) {
             respond(['success' => false, 'error' => 'Insufficient permissions'], 403);
         }
+        $viewerRole = normalizeRole($user['role'] ?? 'sales_rep');
         $members = array_values(array_map(
             fn($u) => ['id' => $u['id'], 'name' => $u['name'], 'username' => $u['username'] ?? '', 'title' => $u['title'] ?? '', 'role' => $u['role'] ?? 'sales_rep'],
-            array_filter(getUsers(), fn($u) => ($u['is_active'] ?? true))
+            array_filter(getUsers(), fn($u) => ($u['is_active'] ?? true)
+                && ($viewerRole === 'super_admin' || $u['id'] === $user['id'] || normalizeRole($u['role'] ?? 'sales_rep') !== 'super_admin'))
         ));
         respond(['success' => true, 'members' => $members]);
         break;
@@ -2811,9 +2990,8 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         if (empty($_GET['include_archived'])) {
             $exportLeads = array_filter($exportLeads, fn($l) => !isArchived($l));
         }
-        if (!hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads')) {
-            $exportLeads = array_filter($exportLeads, fn($l) => $l['owner_id'] === $user['id']);
-        } elseif (!empty($_GET['scope'])) {
+        $exportLeads = visibleLeadsFor($user, array_values($exportLeads));
+        if (hasPermission($user['role'] ?? 'sales_rep', 'view_all_leads') && !empty($_GET['scope'])) {
             if ($_GET['scope'] === 'mine') {
                 $exportLeads = array_filter($exportLeads, fn($l) => $l['owner_id'] === $user['id']);
             } elseif ($_GET['scope'] === 'team') {
@@ -2913,6 +3091,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $threadId = $_GET['thread'] ?? $input['thread'] ?? '';
         if (!$threadId) respond(['success' => false, 'error' => 'Thread required'], 400);
         $safe = preg_replace('/[^a-zA-Z0-9_]/', '', $threadId);
+        if (!canAccessThread($user, $safe)) respond(['success' => false, 'error' => 'Access denied'], 403);
 
         if ($method === 'GET') {
             $messages = getChannelMessages($safe);
@@ -3073,6 +3252,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $threadId = preg_replace('/[^a-zA-Z0-9_]/', '', $input['thread'] ?? '');
         $msgId = $input['message_id'] ?? '';
         if (!$threadId || !$msgId) respond(['success' => false, 'error' => 'Missing fields'], 400);
+        if (!canAccessThread($user, $threadId)) respond(['success' => false, 'error' => 'Access denied'], 403);
         $messages = getChannelMessages($threadId);
         $found = false;
         $isAdminUser = in_array($user['role'] ?? '', ['admin', 'super_admin'], true);
@@ -3099,6 +3279,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $msgId    = $input['message_id'] ?? '';
         $unpin    = !empty($input['unpin']);
         if (!$threadId) respond(['success' => false, 'error' => 'Thread required'], 400);
+        if (!canAccessThread($user, $threadId)) respond(['success' => false, 'error' => 'Access denied'], 403);
         $messages = getChannelMessages($threadId);
 
         if ($unpin) {
@@ -3142,6 +3323,7 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         $user = requireAuth();
         $threadId = preg_replace('/[^a-zA-Z0-9_]/', '', $_POST['thread'] ?? '');
         if (!$threadId) respond(['success' => false, 'error' => 'Thread required'], 400);
+        if (!canAccessThread($user, $threadId)) respond(['success' => false, 'error' => 'Access denied'], 403);
         if (empty($_FILES['file'])) respond(['success' => false, 'error' => 'No file uploaded'], 400);
 
         $file = $_FILES['file'];
@@ -3289,8 +3471,14 @@ Score 0-100 based on: engagement level, freight profile completeness, stage prog
         // Build per-user summary with individual sessions
         $result = [];
         $allUsers = getUsers();
+        // Same hierarchy as leads/meetings/targets/users/audit-log — an
+        // admin sees their own sessions + their sales_reps', never super_admin's.
+        $viewerRole = normalizeRole($user['role'] ?? 'sales_rep');
         foreach ($allUsers as $u) {
             if (isArchived($u)) continue;
+            if ($viewerRole !== 'super_admin'
+                && $u['id'] !== $user['id']
+                && normalizeRole($u['role'] ?? 'sales_rep') === 'super_admin') continue;
             $uid = $u['id'];
             $ls  = $lastSeenMap[$uid] ?? null;
             $sessions = $userSessions[$uid] ?? [];

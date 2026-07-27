@@ -145,6 +145,8 @@ a:hover{text-decoration:underline;}
 .deal-score-med{background:var(--amber-bg);color:#d97706;}
 .deal-score-low{background:var(--red-bg);color:var(--red);}
 .deal-score-none{background:var(--g100);color:var(--g400);}
+.deal-value-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--radius-pill);font-size:16px;font-weight:800;margin-left:8px;background:var(--green);color:#fff;box-shadow:0 2px 6px rgba(16,185,129,0.35);}
+.deal-value-badge::before{content:'💰';font-size:13px;}
 
 /* === MEETING BANNER (dashboard top KPI) === */
 .meeting-banner{background:#173f78;border-radius:var(--radius-lg);padding:22px 26px;color:var(--white);margin-bottom:20px;position:relative;overflow:hidden;}
@@ -301,6 +303,8 @@ a:hover{text-decoration:underline;}
 .pcm-next span{display:block;font-size:11px;color:var(--g500);margin-top:2px;line-height:1.35;}
 .pcm-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
 .pcm-chip{display:inline-flex;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800;background:var(--g100);color:var(--g600);}
+.pcm-deal-badge{flex-shrink:0;display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800;background:var(--green);color:#fff;white-space:nowrap;}
+.pcm-deal-badge::before{content:'💰 ';font-size:9px;}
 .pcm-chip.overdue{background:var(--red-bg);color:var(--red);}
 .pcm-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
 .prospect-table{width:100%;border-collapse:separate;border-spacing:0;}
@@ -321,10 +325,15 @@ a:hover{text-decoration:underline;}
 .prospect-due.overdue{color:var(--red);font-weight:800;}
 .prospect-due.today{color:var(--amber);font-weight:800;}
 .notes-dot{display:inline-flex;width:7px;height:7px;border-radius:999px;background:var(--mm-blue);vertical-align:middle;margin-left:5px;box-shadow:0 0 0 3px var(--mm-blue-10);}
-.prospect-notes-card textarea{width:100%;min-height:130px;resize:vertical;border:1px solid var(--g200);border-radius:var(--radius);padding:10px 12px;font-size:13px;line-height:1.5;color:var(--g700);outline:none;background:var(--white);}
+.prospect-notes-card textarea{width:100%;min-height:64px;resize:vertical;border:1px solid var(--g200);border-radius:var(--radius);padding:10px 12px;font-size:13px;line-height:1.5;color:var(--g700);outline:none;background:var(--white);}
 .prospect-notes-card textarea:focus{border-color:var(--mm-blue);box-shadow:0 0 0 3px var(--mm-blue-10);}
 .notes-save-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;}
 .notes-save-row small{font-size:11px;color:var(--g400);}
+.notes-history{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:320px;overflow-y:auto;}
+.notes-history-item{border:1px solid var(--g200);border-radius:var(--radius);padding:8px 10px;background:var(--bg-main,#f8fafc);}
+.notes-history-item .notes-history-meta{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--g500);margin-bottom:4px;}
+.notes-history-item .notes-history-meta strong{color:var(--g700);font-weight:600;}
+.notes-history-item p{font-size:13px;line-height:1.5;color:var(--g700);margin:0;white-space:pre-wrap;}
 .popup-tab-stack{display:grid;gap:12px;}
 .popup-tab-stack .card,.popup-side-panel .card{border-radius:10px;box-shadow:none;}
 .popup-tab-stack .card:hover,.popup-side-panel .card:hover{box-shadow:none;}
@@ -347,7 +356,7 @@ a:hover{text-decoration:underline;}
 .popup-side-panel .contact-item:last-child{border-bottom:none;}
 .popup-side-panel .contact-item .ci-label{font-size:10px;}
 .popup-side-panel .contact-item .ci-value{font-size:12px;}
-.popup-side-panel .prospect-notes-card textarea{min-height:118px;}
+.popup-side-panel .prospect-notes-card textarea{min-height:60px;}
 
 /* Desktop prospect modal keeps list context visible. */
 @media(min-width:901px){
@@ -1293,6 +1302,7 @@ a:hover{text-decoration:underline;}
                 <h1 id="det-name">Prospect Name</h1>
                 <p id="det-subtitle">Title at Company</p>
             </div>
+            <span id="det-deal-value" class="deal-value-badge hidden"></span>
             <span id="det-badge" class="badge"></span>
             <span id="det-deal-score" class="deal-score deal-score-none"><span class="ds-num">--</span> Score</span>
         </div>
@@ -1317,12 +1327,6 @@ a:hover{text-decoration:underline;}
                 <div class="card">
                     <div class="card-head"><h3>Contact</h3><button class="btn btn-sm btn-secondary" onclick="openEditLead()">Edit</button></div>
                     <div class="contact-grid" id="det-contact"></div>
-                </div>
-                <div class="card prospect-notes-card">
-                    <div class="card-head"><h3>Stage Notes</h3></div>
-                    <select id="det-notes-stage" onchange="renderProspectNotes()" style="width:100%;margin-bottom:8px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;"></select>
-                    <textarea id="det-notes" placeholder="Add notes for this stage: context, objections, trade lanes, current forwarder, decision process..."></textarea>
-                    <div class="notes-save-row"><small id="notes-save-status">Notes are private to this CRM record.</small><button class="btn btn-sm btn-primary" onclick="saveProspectNotes()">Save Notes</button></div>
                 </div>
                 <div class="card freight-card" id="det-freight-card">
                     <div class="card-head"><h3>Freight Profile</h3><button class="btn btn-sm btn-ghost" onclick="openEditFreight()">Edit</button></div>
@@ -2046,7 +2050,7 @@ a:hover{text-decoration:underline;}
 
 <script>
 // ── Global State & Constants ──
-const S = {user:null, leads:[], cur:null, meetings:[], templates:[], sops:[], filter:'', curTab:'profile', searchTO:null, outMtgId:null, leadsPage:1, leadsTotal:0, leadsTotalAll:0, leadsPages:1, lastStats:null, teamMembers:[], msStatus:null, outlookEvents:[], showArchived:false, showArchivedUsers:false, users:[], targets:[], targetUsers:[], targetMetrics:[], calendarDate:new Date(), leadsScope:'', scopedByStatus:{}};
+const S = {user:null, leads:[], cur:null, meetings:[], templates:[], sops:[], filter:'', curTab:'profile', searchTO:null, outMtgId:null, leadsPage:1, leadsTotal:0, leadsTotalAll:0, leadsPages:1, lastStats:null, teamMembers:[], msStatus:null, outlookEvents:[], showArchived:false, showArchivedUsers:false, users:[], targets:[], targetUsers:[], targetMetrics:[], calendarDate:new Date(), leadsScope:'', scopedByStatus:{}, clientNameIndex:[]};
 const API = 'api.php';
 const STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','won','lost','nurture'];
 const ACTIVE_STATUSES = ['new','qualified','researched','contacted','meeting_booked','proposal_sent','nurture'];
@@ -2445,12 +2449,25 @@ async function syncMsCancellations() {
     try { await api('ms-sync-cancellations', 'POST', {}); } catch(e) {}
 }
 
+// Undo the DOM surgery renderDashboardSuperAdmin does (injects
+// .exec-injected cards, hides the Pipeline/Focus Queue grid). Without this,
+// switching from a super_admin account to an admin/sales_rep account in the
+// same session — no full page reload — left the previous user's Execution
+// Signals, Team Performance, and Recent Activity cards (real cross-account
+// data) visible underneath the new, lower-privilege dashboard.
+function clearSuperAdminDashboardExtras() {
+    document.querySelectorAll('.exec-injected').forEach(el => el.remove());
+    const dashGrid = $('dash-pipeline')?.closest('.dash-grid');
+    if (dashGrid) dashGrid.style.display = '';
+}
+
 async function loadDashboard() {
     showLoader('Loading dashboard...');
     syncMsCancellations(); // fire and forget — don't block dashboard load
     try {
         const [st, mr] = await Promise.all([api('stats'), api('meetings')]);
         document.querySelectorAll('.dash-extra').forEach(el => el.remove());
+        clearSuperAdminDashboardExtras();
         if (mr.success) S.meetings = mr.meetings || [];
         if (st.success) {
             S.lastStats = st.stats;
@@ -2520,7 +2537,7 @@ async function renderDashboardSuperAdmin(st) {
     const logs = auditR.success ? auditR.logs : [];
 
     // Remove any previously injected exec cards to prevent stacking on re-render
-    document.querySelectorAll('.exec-injected').forEach(el => el.remove());
+    clearSuperAdminDashboardExtras();
 
     const pageBody = document.querySelector('#page-dashboard .page-body');
     if (!pageBody) return;
@@ -3004,7 +3021,7 @@ function setFilter(f) {
 // status names — the Workbench renames those same stages to Pipeline/Follow
 // Up/Meetings/Proposal for its lanes, and the tabs above them used to still
 // say the old names, which looked like two different sets of stages).
-const WORKBENCH_TAB_LABELS = {researched:'Pipeline', contacted:'Follow Up', meeting_booked:'Meetings', proposal_sent:'Proposal'};
+const WORKBENCH_TAB_LABELS = {researched:'Lead', contacted:'Follow Up', meeting_booked:'Meetings', proposal_sent:'Proposal'};
 
 function renderLeadFilters(d, targetId = 'leads-filters') {
     const total = d?.total ?? S.leadsTotal ?? S.leads.length;
@@ -3074,12 +3091,12 @@ function renderProspectsListTable() {
             <td>
                 <div class="prospect-person">
                     <div class="prospect-avatar">${(l.first_name||'?')[0]}${(l.last_name||'?')[0]}</div>
-                    <div><div class="prospect-name">${l.first_name || ''} ${l.last_name || ''}${(l.notes || hasStageNotes(l)) ? ' <span class="notes-dot" title="Has notes"></span>' : ''}</div><div class="prospect-role">${l.title || l.email || 'No title'}</div></div>
+                    <div><div class="prospect-name">${l.first_name || ''} ${l.last_name || ''}${(l.notes || hasNotes(l)) ? ' <span class="notes-dot" title="Has notes"></span>' : ''}</div><div class="prospect-role">${l.title || l.email || 'No title'}</div></div>
                 </div>
             </td>
             <td><div class="prospect-company"><strong>${l.company || 'No company'}</strong><span>${[l.industry,l.country].filter(Boolean).join(' · ') || '-'}</span></div></td>
             <td><span class="badge badge-${archived ? 'lost' : l.status}">${archived ? 'Archived' : (SL[l.status] || l.status)}</span></td>
-            <td class="col-deal-value">${l.proposal_value ? esc(l.proposal_value) : '<span style="color:var(--g400);">—</span>'}</td>
+            <td class="col-deal-value">${l.proposal_value ? `<span class="pcm-deal-badge">${esc(l.proposal_value)}</span>` : '<span style="color:var(--g400);">—</span>'}</td>
             <td class="col-next-action">${['won','lost'].includes(l.status) ? '<span style="color:var(--g400);">—</span>' : `<div class="next-action-cell"><strong>${nextActionLabel(l)} <span class="prospect-due ${due.cls}">· ${due.text}</span></strong><span>${l.next_action_note || 'No next action set'}</span></div>`}</td>
             <td class="col-updated"><span title="${updated ? new Date(updated).toLocaleString() : ''}">${timeAgo(updated)}</span></td>
             <td class="col-owner"><span class="owner-chip">${l.owner_name || 'Unassigned'}</span></td>
@@ -3154,13 +3171,13 @@ function prospectCard(l) {
         <div class="pcm-head">
             <div class="prospect-avatar">${(l.first_name||'?')[0]}${(l.last_name||'?')[0]}</div>
             <div class="pcm-main"><div class="pcm-name">${l.first_name} ${l.last_name}</div><div class="pcm-company">${l.company || 'No company'}</div></div>
+            ${l.proposal_value ? `<span class="pcm-deal-badge">${esc(l.proposal_value)}</span>` : ''}
         </div>
         ${['won','lost'].includes(l.status) ? '' : `<div class="pcm-next"><strong>${nextActionLabel(l)}</strong><span>${l.next_action_note || 'No next action note set'}</span></div>`}
         <div class="pcm-meta">
             ${['won','lost'].includes(l.status) ? '' : (due ? `<span class="pcm-chip ${overdue ? 'overdue' : ''}">${overdue ? 'Overdue ' : 'Due '}${due}</span>` : '<span class="pcm-chip">No due date</span>')}
             <span class="pcm-chip">${l.owner_name || 'Unassigned'}</span>
-            ${l.proposal_value ? `<span class="pcm-chip">Deal: ${l.proposal_value}</span>` : ''}
-            ${(l.notes || hasStageNotes(l)) ? '<span class="pcm-chip">Has notes</span>' : ''}
+            ${(l.notes || hasNotes(l)) ? '<span class="pcm-chip">Has notes</span>' : ''}
             ${archived ? '<span class="pcm-chip overdue">Archived</span>' : ''}
         </div>
         <div class="pcm-actions" onclick="event.stopPropagation()">${renderLeadRowActions(l)}</div>
@@ -3185,7 +3202,7 @@ function renderProspectBoard() {
         return;
     }
     const allLanes = [
-        {id:'researched',    label:'Pipeline'},
+        {id:'researched',    label:'Lead'},
         {id:'new',           label:'Qualify'},
         {id:'contacted',     label:'Follow Up'},
         {id:'meeting_booked',label:'Meetings'},
@@ -3274,13 +3291,15 @@ function renderLeadCards() {
                     <div class="lead-card-name">${l.first_name} ${l.last_name}${archived?' <span class="badge badge-lost">Archived</span>':''}</div>
                     <div class="lead-card-company">${l.company||''}</div>
                 </div>
-                <span class="badge badge-${l.status}" style="flex-shrink:0">${SL[l.status]||l.status}</span>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+                    <span class="badge badge-${l.status}">${SL[l.status]||l.status}</span>
+                    ${l.proposal_value ? `<span class="pcm-deal-badge">${esc(l.proposal_value)}</span>` : ''}
+                </div>
             </div>
             <div class="lead-card-meta">
                 <span>${l.industry||'—'}</span>
                 ${['won','lost'].includes(l.status) ? '' : `<span>${nextActionLabel(l)}${l.next_action_due ? ' · ' + l.next_action_due : ''}</span>`}
                 ${ds > 0 ? `<span>Score: ${ds}</span>` : ''}
-                ${l.proposal_value ? `<span>Deal: ${esc(l.proposal_value)}</span>` : ''}
                 ${od ? '<span style="color:var(--red);font-weight:600">Next action overdue</span>' : ''}
             </div>
             <div class="row-actions" style="margin-top:10px;" onclick="event.stopPropagation()">${renderLeadRowActions(l)}</div>
@@ -3360,6 +3379,18 @@ function clearAddForm() {
 // ============================================================
 
 async function openDetail(id) {
+    // Fetch first, open the modal/page only on success — otherwise a
+    // permission-denied lead (e.g. a rep clicking a #client chat tag for a
+    // lead outside their visibility tier) briefly showed an empty detail
+    // view with a vague "not found" toast instead of a clear denial.
+    showLoader('Loading prospect...');
+    const r = await fetch(`${API}?action=lead&id=${id}`, {headers:{'X-User-Token':S.user.token}});
+    const d = await r.json();
+    hideLoader();
+    if (!d.success) {
+        toast(d.error === 'Access denied' ? 'Access denied — you don\'t have permission to view this client' : (d.error || 'Prospect not found'), 'error');
+        return;
+    }
     const desktopPopup = window.matchMedia('(min-width: 901px)').matches;
     S.detailReturnPage = currentProspectSurface();
     if (desktopPopup) {
@@ -3371,13 +3402,8 @@ async function openDetail(id) {
         $('page-detail').classList.remove('prospect-modal');
         showPage('detail');
     }
-    showLoader('Loading prospect...');
-    const r = await fetch(`${API}?action=lead&id=${id}`, {headers:{'X-User-Token':S.user.token}});
-    const d = await r.json();
     const mr = await api('meetings');
     if (mr.success) S.meetings = mr.meetings || [];
-    hideLoader();
-    if (!d.success) return toast('Prospect not found', 'error');
     S.cur = d.lead;
     S.curTab = 'overview';
     renderDetail();
@@ -3415,6 +3441,13 @@ function renderDetail() {
     $('det-subtitle').textContent = `${l.title||'No title'} at ${l.company||'Unknown'}`;
     $('det-badge').textContent = SL[l.status] || l.status;
     $('det-badge').className = `badge badge-${l.status}`;
+    // Deal Value — shown prominently in the header, next to the status
+    // badge, so it's visible on every tab without hunting through the side panel.
+    const dv = $('det-deal-value');
+    if (dv) {
+        if (l.proposal_value) { dv.textContent = l.proposal_value; dv.classList.remove('hidden'); }
+        else dv.classList.add('hidden');
+    }
     // Deal score
     const ds = l.deal_score || 0;
     $('det-deal-score').innerHTML = ds > 0 ? `<span class="badge ${dealScoreClass(ds)}">Score: ${ds}</span>` : '';
@@ -3424,54 +3457,60 @@ function renderDetail() {
     renderStageActions();
     renderDetailTabs();
     renderContact();
-    renderProspectNotes();
     renderFreightProfile();
     renderSOP();
     switchTab(S.curTab);
 }
 
-function hasStageNotes(l) {
-    return !!Object.values(l.stage_notes || {}).some(n => (n || '').trim());
+function hasNotes(l) {
+    return !!(l.notes_history || []).length;
+}
+
+function renderNotesTab() {
+    return `<div class="popup-tab-stack">
+        <div class="card prospect-notes-card">
+            <div class="card-head"><h3>Notes</h3></div>
+            <textarea id="det-notes" placeholder="Add a note: context, objections, trade lanes, current forwarder, decision process..." rows="4"></textarea>
+            <div class="notes-save-row"><small id="notes-save-status">Notes are private to this CRM record.</small><button class="btn btn-sm btn-primary" onclick="saveProspectNotes()">Add Note</button></div>
+            <div id="det-notes-history" class="notes-history"></div>
+        </div>
+    </div>`;
 }
 
 function renderProspectNotes() {
     const el = $('det-notes');
-    const stageSelect = $('det-notes-stage');
-    if (!el || !stageSelect || !S.cur) return;
-    const stageNotes = S.cur.stage_notes || {};
-    if (!stageSelect.dataset.built) {
-        stageSelect.innerHTML = STATUSES.map(s => `<option value="${s}">${SL[s] || s}</option>`).join('');
-        stageSelect.dataset.built = '1';
-    }
-    if (!stageSelect.value || stageSelect.dataset.leadId !== S.cur.id) {
-        stageSelect.value = S.cur.status;
-        stageSelect.dataset.leadId = S.cur.id;
-    }
-    const stage = stageSelect.value;
-    el.value = stageNotes[stage] || '';
+    const history = $('det-notes-history');
+    if (!el || !history || !S.cur) return;
+    el.value = '';
+    const entries = [...(S.cur.notes_history || [])].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
     const status = $('notes-save-status');
-    if (status) status.textContent = stageNotes[stage] ? `Notes saved for ${SL[stage] || stage}.` : `No notes yet for ${SL[stage] || stage}.`;
+    if (status) status.textContent = entries.length ? `${entries.length} note${entries.length===1?'':'s'} on this record.` : 'No notes yet.';
+    history.innerHTML = entries.length ? entries.map(n => `
+        <div class="notes-history-item">
+            <div class="notes-history-meta"><strong>${esc(n.author || 'Unknown')}</strong><span>${n.created_at ? new Date(n.created_at).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : ''}</span></div>
+            <p>${esc(n.text || '').replace(/\n/g, '<br>')}</p>
+        </div>
+    `).join('') : '<p style="font-size:12px;color:var(--g400);padding:4px 0;">No notes yet — add the first one above.</p>';
 }
 
 async function saveProspectNotes() {
     if (!S.cur?.id) return;
-    const stage = $('det-notes-stage')?.value || S.cur.status;
     const text = $('det-notes')?.value?.trim() || '';
-    const stageNotes = {...(S.cur.stage_notes || {}), [stage]: text};
+    if (!text) { toast('Write a note before adding it', 'warning'); return; }
+    const entry = { id: 'note_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), text, author: S.user?.name || 'Unknown', created_at: new Date().toISOString() };
+    const history = [...(S.cur.notes_history || []), entry];
     const status = $('notes-save-status');
     if (status) status.textContent = 'Saving...';
-    const r = await api('lead', 'PUT', {id:S.cur.id, stage_notes: stageNotes});
+    const r = await api('lead', 'PUT', {id:S.cur.id, notes_history: history});
     if (r.success) {
-        S.cur = r.lead;
-        const idx = S.leads.findIndex(l => l.id === S.cur.id);
-        if (idx >= 0) S.leads[idx] = r.lead;
-        renderLeadTable();
-        renderLeadCards();
-        if (status) status.textContent = `Saved ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
-        toast('Stage notes saved', 'success');
+        applyLeadUpdate(r.lead);
+        $('det-notes').value = '';
+        renderProspectNotes();
+        renderDetailTabs();
+        toast('Note added', 'success');
     } else {
         if (status) status.textContent = 'Save failed.';
-        toast(r.error || 'Could not save notes', 'error');
+        toast(r.error || 'Could not save note', 'error');
     }
 }
 
@@ -3580,12 +3619,14 @@ function renderStageActions() {
 function renderDetailTabs() {
     const hasR = !!S.cur.enrichment;
     const activityCount = (S.cur.call_logs||[]).length + (S.cur.meetings||[]).length + (S.cur.email_history||[]).length;
+    const noteCount = (S.cur.notes_history||[]).length;
     const tabs = [
         {id:'overview', label:'Overview', icon:'&#128100;'},
         {id:'research', label:'AI Research', icon:'&#128269;', badge: hasR ? '&#10003;' : ''},
         {id:'outreach', label:'Outreach', icon:'&#9993;', locked:!hasR, badge: (S.cur.emails_sent || (S.cur.call_logs||[]).length) || ''},
         {id:'activity', label:'Activity', icon:'&#128340;', badge: activityCount || ''},
-        {id:'qualification', label:'Qualification', icon:'&#128203;', badge: (S.cur.requisites||[]).length || (hasR ? '&#10003;' : '')}
+        {id:'qualification', label:'Qualification', icon:'&#128203;', badge: (S.cur.requisites||[]).length || (hasR ? '&#10003;' : '')},
+        {id:'notes', label:'Notes', icon:'&#128221;', badge: noteCount || ''}
     ];
     $('det-tabs').innerHTML = tabs.map(t => { const oc = t.locked ? "toast('Complete AI Research first','warning')" : "switchTab('"+t.id+"')"; return `<button class="tab-btn ${S.curTab===t.id?'active':''} ${t.locked?'locked':''}" data-tab="${t.id}" onclick="${oc}">${t.icon} ${t.label}${t.badge ? `<span class="tab-count">${t.badge}</span>` : ''}</button>`; }).join('');
 }
@@ -3601,7 +3642,8 @@ function switchTab(tab) {
         research: () => c.innerHTML = renderResearchTab(),
         outreach: () => c.innerHTML = renderOutreachTab(),
         activity: () => c.innerHTML = renderUnifiedActivityTab(),
-        qualification: () => c.innerHTML = renderQualificationTab()
+        qualification: () => c.innerHTML = renderQualificationTab(),
+        notes: () => { c.innerHTML = renderNotesTab(); renderProspectNotes(); }
     };
     try {
         (handlers[tab] || handlers.overview)();
@@ -5342,9 +5384,12 @@ let reqFieldsConfig = [];
 
 async function loadReqFields() {
     try {
-        const r = await api('admin-settings');
-        if (r.success && r.settings?.requisite_fields) {
-            reqFieldsConfig = r.settings.requisite_fields;
+        // admin-settings is admin-only (it also returns API keys); every
+        // rep needs the requisite field definitions to log calls, so this
+        // uses the read-only requisite-fields endpoint any user can call.
+        const r = await api('requisite-fields');
+        if (r.success && r.requisite_fields) {
+            reqFieldsConfig = r.requisite_fields;
         }
     } catch(e) { /* use defaults */ }
 }
@@ -5506,11 +5551,17 @@ let chatChannelData = [];
 let chatDmData = [];
 
 async function loadChat() {
-    // #client-reference autocomplete needs S.leads, which is otherwise only
-    // populated by visiting Leads/Workbench — fetch it here too so typing #
-    // works even if Chat is the first page opened this session.
+    // #client-reference autocomplete (composing) needs S.leads, which is
+    // otherwise only populated by visiting Leads/Workbench — fetch it here
+    // too so typing # works even if Chat is the first page opened this
+    // session. Rendering #tags in RECEIVED messages uses the separate
+    // clientNameIndex (below) so a tag is highlighted/clickable for every
+    // client in the system, not just leads this viewer can see — clicking
+    // one outside their access is blocked with Access Denied by the lead
+    // endpoint itself, not by hiding the tag's existence.
     const chatTasks = [loadChatChannels(), loadChatDms()];
     if (!S.leads.length) chatTasks.push(fetchProspectsPage(null));
+    if (!S.clientNameIndex.length) chatTasks.push(api('client-name-index').then(r => { if (r.success) S.clientNameIndex = r.leads; }));
     await Promise.all(chatTasks);
     openChatThread('channel_general', 'general', false, '');
     if (window.innerWidth <= 768) {
@@ -5615,7 +5666,11 @@ function buildMessageEl(m, grouped) {
         // fixed word-boundary pattern, so multi-word names resolve — longest name
         // first, so e.g. "Florence Ortiz Jones" wins over a shorter "Florence" match.
         .replace(/#([A-Za-z0-9_][A-Za-z0-9_\- ]*)/g, (match, rest) => {
-            const names = [...new Set((S.leads || [])
+            // clientNameIndex covers every lead in the system (not just this
+            // viewer's visible set) so the tag is highlighted/clickable
+            // regardless of who owns the lead — access is enforced when the
+            // tag is actually clicked (openDetail -> canViewLead), not here.
+            const names = [...new Set((S.clientNameIndex || [])
                 .map(l => `${l.first_name || ''} ${l.last_name || ''}`.trim())
                 .filter(Boolean))]
                 .sort((a, b) => b.length - a.length);
@@ -5623,7 +5678,7 @@ function buildMessageEl(m, grouped) {
             // against the escaped form of each client name, not the raw name.
             const hit = names.find(n => rest.toLowerCase().startsWith(esc(n).toLowerCase()));
             if (!hit) return match;
-            const ids = (S.leads || []).filter(l => `${l.first_name || ''} ${l.last_name || ''}`.trim() === hit).map(l => l.id);
+            const ids = (S.clientNameIndex || []).filter(l => `${l.first_name || ''} ${l.last_name || ''}`.trim() === hit).map(l => l.id);
             const idsAttr = JSON.stringify(ids).replace(/"/g, '&quot;');
             const hitLen = esc(hit).length;
             const tag = rest.slice(0, hitLen);
@@ -6025,7 +6080,10 @@ function handleMentionTyping(input) {
     const clientMatch = before.match(/#([a-zA-Z0-9_\- ]*)$/);
     if (clientMatch) {
         const query = clientMatch[1].toLowerCase();
-        const named = (S.leads || []).filter(l => (l.first_name || l.last_name));
+        // clientNameIndex, not S.leads — a rep can reference any client by
+        // name when composing, same as anyone could just type the name from
+        // memory; the actual lead is only protected when opened, not when named.
+        const named = (S.clientNameIndex || []).filter(l => (l.first_name || l.last_name));
         const filtered = (query ? named.filter(l => `${l.first_name||''} ${l.last_name||''}`.toLowerCase().includes(query)) : named.slice(0, 8));
         if (!filtered.length) { if (picker) picker.innerHTML = ''; return; }
         picker.innerHTML = filtered.map((l, i) => {
@@ -6087,7 +6145,7 @@ function insertClientRef(name) {
 // Visible "Reference a client" button next to the chat input — same result
 // as typing #, but discoverable without knowing the # shortcut exists.
 async function openClientRefPicker() {
-    if (!S.leads.length) await fetchProspectsPage(null);
+    if (!S.clientNameIndex.length) await api('client-name-index').then(r => { if (r.success) S.clientNameIndex = r.leads; });
     $('client-ref-search').value = '';
     renderClientRefList();
     openModal('m-client-ref');
@@ -6098,7 +6156,10 @@ function renderClientRefList() {
     const q = ($('client-ref-search')?.value || '').toLowerCase();
     const list = $('client-ref-list');
     if (!list) return;
-    const leads = (S.leads || []).filter(l => !q ||
+    // clientNameIndex covers every client, not just this viewer's own —
+    // Insert/reference is allowed for anyone; Open is still access-checked
+    // by openDetail when clicked.
+    const leads = (S.clientNameIndex || []).filter(l => !q ||
         `${l.first_name || ''} ${l.last_name || ''}`.toLowerCase().includes(q) ||
         (l.company || '').toLowerCase().includes(q)
     );
@@ -6118,7 +6179,7 @@ function renderClientRefList() {
 }
 
 function pickClientRefToInsert(id) {
-    const lead = (S.leads || []).find(l => l.id === id);
+    const lead = (S.clientNameIndex || []).find(l => l.id === id);
     closeModal('m-client-ref');
     const name = `${lead?.first_name || ''} ${lead?.last_name || ''}`.trim();
     if (!lead || !name) return;
@@ -6134,7 +6195,10 @@ function pickClientRefToInsert(id) {
 // name show a small chooser instead of guessing which one was meant.
 function openClientRef(ids) {
     if (ids.length === 1) { openDetail(ids[0]); return; }
-    const leads = ids.map(id => (S.leads || []).find(l => l.id === id)).filter(Boolean);
+    // Uses clientNameIndex (every lead, not just this viewer's visible set)
+    // so the chooser lists every same-named client — clicking one outside
+    // the viewer's access still goes through openDetail's Access Denied check.
+    const leads = ids.map(id => (S.clientNameIndex || []).find(l => l.id === id)).filter(Boolean);
     const existing = document.getElementById('client-ref-picker');
     if (existing) existing.remove();
     const picker = document.createElement('div');
