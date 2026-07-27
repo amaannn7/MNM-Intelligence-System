@@ -2608,8 +2608,10 @@ async function renderDashboardSuperAdmin(st) {
 
     const focusCard = document.createElement('div');
     focusCard.className = 'card';
-    focusCard.style.cssText = 'overflow-y:auto;max-height:480px;';
-    focusCard.innerHTML = `<div class="card-head" style="position:sticky;top:0;background:white;z-index:1;padding-bottom:10px;border-bottom:1px solid var(--g100);"><h3>Focus Queue</h3></div><div id="exec-focus"></div>`;
+    // No fixed height/scroll here — Focus Queue only ever shows up to 8 items
+    // (renderFocusQueue caps it), so letting the card grow to fit avoids any
+    // partial-row clipping a scrollbar would otherwise show.
+    focusCard.innerHTML = `<div class="card-head"><h3>Focus Queue</h3></div><div id="exec-focus"></div>`;
 
     row3.appendChild(pipeCard);
     row3.appendChild(focusCard);
@@ -2618,8 +2620,8 @@ async function renderDashboardSuperAdmin(st) {
     // ── Row 4: Recent Activity (full width) ───────────────────────────────
     const actCard = document.createElement('div');
     actCard.className = 'card exec-injected';
-    actCard.style.cssText = 'margin-top:16px;overflow-y:auto;max-height:480px;';
-    actCard.innerHTML = `<div class="card-head" style="position:sticky;top:0;background:white;z-index:1;"><h3>Recent Activity</h3><a href="#" onclick="showPage('activity');return false;" style="font-size:12px;color:var(--mm-blue);font-weight:600;">View all →</a></div><div style="font-size:12px;">${renderActivityFeed(logs, 10)}</div>`;
+    actCard.style.cssText = 'margin-top:16px;display:flex;flex-direction:column;height:480px;min-height:0;';
+    actCard.innerHTML = `<div class="card-head" style="flex-shrink:0;display:flex;justify-content:space-between;align-items:center;"><h3>Recent Activity</h3><a href="#" onclick="showPage('activity');return false;" style="font-size:12px;color:var(--mm-blue);font-weight:600;">View all →</a></div><div style="font-size:12px;overflow-y:auto;min-height:0;flex:1 1 auto;">${renderActivityFeed(logs, 10)}</div>`;
     pageBody.appendChild(actCard);
 
     if (origPipeline) $('exec-pipeline').innerHTML = origPipeline.innerHTML;
