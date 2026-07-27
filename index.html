@@ -2608,7 +2608,7 @@ async function renderDashboardSuperAdmin(st) {
     const focusCard = document.createElement('div');
     focusCard.className = 'card';
     focusCard.style.cssText = 'overflow-y:auto;max-height:480px;';
-    focusCard.innerHTML = `<div class="card-head" style="position:sticky;top:0;background:white;z-index:1;"><h3>Focus Queue</h3></div><div id="exec-focus"></div>`;
+    focusCard.innerHTML = `<div class="card-head" style="position:sticky;top:0;background:white;z-index:1;padding-bottom:10px;border-bottom:1px solid var(--g100);"><h3>Focus Queue</h3></div><div id="exec-focus"></div>`;
 
     const actCard = document.createElement('div');
     actCard.className = 'card';
